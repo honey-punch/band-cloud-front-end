@@ -6,7 +6,7 @@ const api = ky.extend({
       (request, options, response) => {
         // 401 Unauthorized 인 경우 로그인 페이지로 이동
         if (response.status === 401) {
-          location.href = '/login';
+          // location.href = '/login';
         }
       },
     ],

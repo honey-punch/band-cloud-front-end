@@ -1,9 +1,27 @@
 import api from '@/entries';
 
-export async function getUser() {
-  const response = await api.get(`/api/user`, {
+export async function getUserSearch() {
+  const response = await api.get<ApiResponse<User[]>>(`/api/user/search?isDeleted=false`, {
     next: {
-      tags: ['user'],
+      tags: ['user', 'search'],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}
+
+export async function getUserById(id: string) {
+  const response = await api.get<ApiResponse<User>>(`/api/user/${id}`, {
+    next: {
+      tags: ['user', id],
     },
     headers: {
       'Content-Type': 'application/json',
@@ -14,5 +32,5 @@ export async function getUser() {
     throw new Error(response.statusText);
   }
 
-  return response.json().then((res) => res);
+  return response.json().then((res) => res.result);
 }

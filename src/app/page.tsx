@@ -1,11 +1,23 @@
-'use client';
-
-import { useUser } from '@/hooks/user/useUser';
+import Main from '@/app/_component/Main';
 
 export default function Home() {
-  const { user } = useUser();
+  // async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  //   e.preventDefault();
+  //   const response = await api.post('/api/auth/login', {
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ userId, password }),
+  //   });
+  //
+  //   const result = await response.json();
+  //
+  //   console.log(result);
+  // }
 
-  console.log(user);
-
-  return <div>zzz</div>;
+  return (
+    <div>
+      <Main />
+    </div>
+  );
 }

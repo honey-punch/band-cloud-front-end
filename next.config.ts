@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         source: '/api/:path*',
         destination: `${process.env.API_HOST}/api/:path*`,
       },
+      {
+        source: '/file/:path*',
+        destination: `${process.env.API_HOST}/file/:path*`,
+      },
     ];
   },
 };
