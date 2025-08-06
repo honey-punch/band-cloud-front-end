@@ -4,6 +4,7 @@ import HoverPlugin from 'wavesurfer.js/dist/plugins/hover.esm.js';
 import { useUserById } from '@/hooks/user/useUser';
 import { secWithMsTohhmmss } from '@/utils/util';
 import { IoMdPlay, IoMdPause } from 'react-icons/io';
+import { PiSpeakerSimpleHighFill, PiSpeakerSimpleSlashFill } from 'react-icons/pi';
 
 interface WaveAudioPlayerProps {
   title: string;
@@ -32,7 +33,10 @@ export default function WaveAudioPlayer({
 
   // useState
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [volume, setVolume] = useState<number>(1);
+  const [prevVolume, setPrevVolume] = useState<number>(1);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // useEffect
   useEffect(() => {
@@ -42,19 +46,19 @@ export default function WaveAudioPlayer({
     const ws = WaveSurfer.create({
       container: containerRef.current,
       waveColor: 'white',
-      progressColor: 'orange',
+      progressColor: '#ff6900',
       cursorColor: 'black',
       height: 80,
-      barWidth: 4,
+      width: 500,
+      barWidth: 3,
       barGap: 2,
-      barRadius: 9999,
       plugins: [
         HoverPlugin.create({
-          lineColor: '#ff6600',
+          lineColor: '#ff6900',
           lineWidth: 4,
-          labelBackground: '#555',
+          labelBackground: 'rgba(16, 24, 40, 0.8)',
           labelColor: '#fff',
-          labelSize: '11px',
+          labelSize: '12px',
           labelPreferLeft: false,
         }),
       ],
@@ -111,9 +115,38 @@ export default function WaveAudioPlayer({
       : hadndleCurrentPlayingAssetId(null);
   }
 
-  console.log(isPlaying);
+  function handleChangeVolume(e: React.ChangeEvent<HTMLInputElement>) {
+    const newVolume = parseFloat(e.target.value);
+
+    wavesurferRef.current?.setVolume(newVolume);
+
+    if (newVolume === 0) {
+      wavesurferRef.current?.setMuted(true);
+      setIsMuted(true);
+      setVolume(newVolume);
+    } else {
+      wavesurferRef.current?.setMuted(false);
+      setIsMuted(false);
+      setVolume(newVolume);
+    }
+  }
+
+  function handleChangePrevVolume() {
+    if (volume === 0) {
+      return;
+    }
+    setPrevVolume(volume);
+  }
+
+  function handleChangeMute() {
+    setIsMuted(!isMuted);
+    setVolume(isMuted ? prevVolume : 0);
+    wavesurferRef.current?.setMuted(!isMuted);
+    wavesurferRef.current?.setVolume(isMuted ? prevVolume : 0);
+  }
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-2">
       <div className="flex gap-4 items-center">
         <button
           onClick={onPlayPause}
@@ -127,12 +160,35 @@ export default function WaveAudioPlayer({
         </div>
       </div>
 
-      <div>
-        {secWithMsTohhmmss(currentTime)}/
-        {secWithMsTohhmmss(wavesurferRef.current?.getDuration() || 0)}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleChangeMute}
+          className="cursor-pointer hover:bg-white hover:text-black active:bg-gray-300 active:text-black transition-colors p-2 rounded-full"
+        >
+          {isMuted ? <PiSpeakerSimpleSlashFill /> : <PiSpeakerSimpleHighFill />}
+        </button>
+
+        <input
+          type="range"
+          value={volume}
+          step={0.01}
+          min={0}
+          max={1}
+          onChange={handleChangeVolume}
+          onMouseUp={handleChangePrevVolume}
+          className="h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-orange-500"
+        />
       </div>
 
-      <div ref={containerRef} className="relative cursor-pointer" style={{ width: '100%' }} />
+      <div className="relative w-full">
+        <div ref={containerRef} className="cursor-pointer" style={{ width: '100%' }} />
+        <div className="absolute bottom-0 left-0 bg-gray-900/80 z-10 text-sm px-1">
+          {secWithMsTohhmmss(currentTime)}
+        </div>
+        <div className="absolute bottom-0 right-0 bg-gray-900/80 z-10 text-sm px-1">
+          {secWithMsTohhmmss(wavesurferRef.current?.getDuration() || 0)}
+        </div>
+      </div>
     </div>
   );
 }
