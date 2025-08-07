@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAssetSearch } from '@/entries/asset/api';
+import { getAssetById, getAssetSearch } from '@/entries/asset/api';
 
 export function useAssetSearch() {
   const { data, isLoading } = useQuery<Asset[]>({
@@ -10,4 +10,15 @@ export function useAssetSearch() {
   });
 
   return { assetList: data, isLoadingAssetList: isLoading };
+}
+
+export function useAssetById(id: string) {
+  const { data, isLoading } = useQuery<Asset>({
+    queryKey: ['asset', id],
+    queryFn: () => getAssetById(id),
+    staleTime: 60 * 1_000,
+    gcTime: 120 * 1_000,
+  });
+
+  return { asset: data, isLoadingAsset: isLoading };
 }
