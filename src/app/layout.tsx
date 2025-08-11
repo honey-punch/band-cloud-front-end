@@ -5,6 +5,7 @@ import RQProvider from '@/app/_component/RQProvider';
 import NavBar from '@/app/_component/NavBar';
 import BottomPlayer from '@/app/_component/BottomPlayer';
 import CurrentAudioProvider from '@/app/_component/CurrentAudioProvider';
+import { ToastContainer } from 'react-toastify';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,10 +34,11 @@ export default function RootLayout({
         <RQProvider>
           <CurrentAudioProvider>
             <NavBar />
-            <div className="px-8 overflow-y-auto h-[calc(100vh-160px)]">{children}</div>
+            <div className="p-8 overflow-y-auto h-[calc(100vh-160px)]">{children}</div>
             <BottomPlayer />
           </CurrentAudioProvider>
         </RQProvider>
+        <ToastContainer />
       </body>
     </html>
   );
