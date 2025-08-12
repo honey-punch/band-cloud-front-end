@@ -33,3 +33,39 @@ export async function getAssetById(id: string) {
 
   return response.json().then((res) => res.result);
 }
+
+export async function createAsset(body: CreateAssetBody) {
+  const response = await api.post<ApiResponse<Asset>>(`/api/asset`, {
+    next: {
+      tags: ['asset', 'create'],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}
+
+export async function upload(body: UploadBody) {
+  const { assetId, multipartFile } = body;
+  const formData = new FormData();
+
+  formData.append('assetId', assetId);
+  formData.append('multipartFile', multipartFile);
+
+  const response = await api.post<ApiResponse<string>>(`/api/asset/upload`, {
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}

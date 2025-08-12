@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMe, login, logout } from '@/entries/auth/api';
 
-export function useLogin(onSuccess?: () => void, onError?: () => void) {
+export function useLogin(onSuccess?: (data: User) => void, onError?: () => void) {
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation<User, Error, LoginBody>({
     mutationKey: ['auth', 'login'],
-    mutationFn: ({ userId, password }: LoginBody) => login({ userId, password }),
-    onSuccess: () => {
+    mutationFn: (body: LoginBody) => login(body),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      onSuccess && onSuccess();
+      onSuccess && onSuccess(data);
     },
     onError: () => {
       onError && onError();

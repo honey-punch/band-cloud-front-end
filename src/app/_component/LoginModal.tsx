@@ -3,6 +3,8 @@ import { useLogin } from '@/hooks/auth/useAuth';
 
 interface LoginModalProps {
   closeLoginModal(): void;
+
+  handleChangeMe(me: User | null): void;
 }
 
 interface LoginInputProps {
@@ -13,10 +15,11 @@ interface LoginInputProps {
   onChange(e: ChangeEvent<HTMLInputElement>): void;
 }
 
-export default function LoginModal({ closeLoginModal }: LoginModalProps) {
+export default function LoginModal({ closeLoginModal, handleChangeMe }: LoginModalProps) {
   // hooks
-  const { login } = useLogin(() => {
+  const { login } = useLogin((user) => {
     closeLoginModal();
+    handleChangeMe(user);
   });
 
   // states

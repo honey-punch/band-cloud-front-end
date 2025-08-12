@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getAssetById, getAssetSearch } from '@/entries/asset/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createAsset, getAssetById, getAssetSearch } from '@/entries/asset/api';
 
 export function useAssetSearch() {
   const { data, isPending } = useQuery<Asset[]>({
@@ -22,4 +22,22 @@ export function useAssetById(id: string) {
   });
 
   return { asset: data, isLoadingAsset: isPending };
+}
+
+export function useCreateAsset(onSuccess?: () => void, onError?: () => void) {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation<Asset, Error, CreateAssetBody>({
+    mutationKey: ['asset', 'create'],
+    mutationFn: (body: CreateAssetBody) => createAsset(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      onSuccess && onSuccess();
+    },
+    onError: () => {
+      onError && onError();
+    },
+  });
+
+  return { createAsset: mutate, isLoadingCreateAsset: isPending };
 }

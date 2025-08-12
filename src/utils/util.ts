@@ -12,3 +12,18 @@ export function secWithMsTohhmmss(sec: number) {
     return `${pad(minutes)}:${pad(seconds)}`;
   }
 }
+
+export function getUserOrFalse(obj: User | string): User | null {
+  if (
+    obj !== null &&
+    typeof obj === 'object' &&
+    typeof obj.id === 'string' &&
+    typeof obj.userId === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.createdDate === 'string' &&
+    typeof obj.isDeleted === 'boolean'
+  ) {
+    return obj as User;
+  }
+  return null;
+}

@@ -6,12 +6,15 @@ interface UserMenuProps {
   userMenuRef: RefObject<HTMLDivElement | null>;
 
   closeUserMenu(): void;
+
+  handleChangeMe(user: User | null): void;
 }
 
-export default function UserMenu({ userMenuRef, closeUserMenu }: UserMenuProps) {
+export default function UserMenu({ userMenuRef, closeUserMenu, handleChangeMe }: UserMenuProps) {
   // hooks
   const { logout } = useLogout(() => {
     closeUserMenu();
+    handleChangeMe(null);
   });
   const router = useRouter();
 

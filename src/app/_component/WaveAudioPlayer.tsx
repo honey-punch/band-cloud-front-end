@@ -12,9 +12,17 @@ interface WaveAudioPlayerProps {
   assetId: string;
   userId: string;
   src: string;
+
+  handleChangeAudioSrc(audioSrc: string): void;
 }
 
-export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAudioPlayerProps) {
+export default function WaveAudioPlayer({
+  title,
+  assetId,
+  userId,
+  src,
+  handleChangeAudioSrc,
+}: WaveAudioPlayerProps) {
   // useRef
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -71,6 +79,10 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
       setCurrentTime(0);
     });
 
+    ws.on('error', () => {
+      handleChangeAudioSrc('/default.mp3');
+    });
+
     ws.on('play', () => setIsPlaying(true));
     ws.on('pause', () => setIsPlaying(false));
 
@@ -81,7 +93,6 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
 
     ws.on('finish', () => {
       setIsPlaying(false);
-      // setCurrentPlayingAssetId(null);
     });
 
     return () => {
@@ -162,6 +173,7 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
 
       <div className="relative w-full">
         <div ref={containerRef} className="cursor-pointer" style={{ width: '100%' }} />
+
         <div className="absolute bottom-0 left-0 bg-zinc-900/80 z-10 text-sm px-1">
           {secWithMsTohhmmss(isCurrent ? currentTime : 0)}
         </div>

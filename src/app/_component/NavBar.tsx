@@ -1,23 +1,31 @@
 'use client';
 
-import { useMe } from '@/hooks/auth/useAuth';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import LoginModal from '@/app/_component/LoginModal';
 import UserMenu from '@/app/_component/UserMenu';
 import { useRouter } from 'next/navigation';
+import { FaPlus } from 'react-icons/fa6';
+import { UploadContext } from '@/app/_component/UploadProvider';
+import { MeContext } from '@/app/_component/MeProvider';
 
 export default function NavBar() {
   // refs
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // hooks
-  const { me, isLoadingMe } = useMe();
   const router = useRouter();
 
+  // context
+  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
+
+  // context
+  const { setIsDrawerOpen } = useContext(UploadContext);
+
   // states
-  const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
   const [isOpenUserMenu, setIsOpenUserMenu] = useState<boolean>(false);
-  const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${me?.id || ''}`);
+  const [avatarSrc, setAvatarSrc] = useState<string>(
+    me ? `/file/avatar/${me.id}` : '/default-avatar.jpg',
+  );
 
   // effects
   useEffect(() => {
@@ -53,19 +61,31 @@ export default function NavBar() {
     setIsOpenLoginModal(false);
   }
 
+  function handleChangeMe(me: User | null) {
+    setMe(me);
+  }
+
   return (
     <nav className="flex h-20 items-center justify-between px-8">
       <div
         onClick={() => {
           router.push('/');
         }}
-        className="font-bold text-3xl cursor-pointer hover:text-zinc-200 active:text-zinc-300 transition-colors"
+        className="font-bold text-3xl cursor-pointer hover:text-zinc-300 active:text-zinc-400 transition-colors"
       >
         BAND CLOUD
       </div>
 
-      <div>
-        {!isLoadingMe && me ? (
+      {me ? (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              setIsDrawerOpen(true);
+            }}
+            className="font-semibold text-lg p-3 flex items-center justify-center cursor-pointer hover:text-zinc-300 active:text-zinc-400 transition-colors"
+          >
+            <FaPlus />
+          </button>
           <button
             onClick={() => {
               setIsOpenUserMenu(true);
@@ -82,18 +102,17 @@ export default function NavBar() {
             />
             <div className="font-semibold text-lg">{me.name}</div>
           </button>
-        ) : (
-          <button
-            onClick={() => {
-              setIsOpenLoginModal(true);
-            }}
-            disabled={isLoadingMe}
-            className="cursor-pointer font-semibold text-lg hover:text-zinc-200 active:text-zinc-300 transition-colors"
-          >
-            Sign in
-          </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => {
+            setIsOpenLoginModal(true);
+          }}
+          className="cursor-pointer font-semibold text-lg hover:text-zinc-300 active:text-zinc-400 transition-colors"
+        >
+          Sign in
+        </button>
+      )}
 
       {/* 모달 */}
       {isOpenLoginModal && (
@@ -103,13 +122,17 @@ export default function NavBar() {
           }}
           className="absolute flex justify-center items-center top-0 left-0 w-screen h-screen bg-white/60 z-50"
         >
-          <LoginModal closeLoginModal={closeLoginModal} />
+          <LoginModal closeLoginModal={closeLoginModal} handleChangeMe={handleChangeMe} />
         </div>
       )}
 
       {isOpenUserMenu && (
         <div className="absolute right-8 top-18">
-          <UserMenu userMenuRef={userMenuRef} closeUserMenu={closeUserMenu} />
+          <UserMenu
+            userMenuRef={userMenuRef}
+            closeUserMenu={closeUserMenu}
+            handleChangeMe={handleChangeMe}
+          />
         </div>
       )}
     </nav>

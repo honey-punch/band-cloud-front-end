@@ -6,6 +6,11 @@ import NavBar from '@/app/_component/NavBar';
 import BottomPlayer from '@/app/_component/BottomPlayer';
 import CurrentAudioProvider from '@/app/_component/CurrentAudioProvider';
 import { ToastContainer } from 'react-toastify';
+import api from '@/entries';
+import { getUserOrFalse } from '@/utils/util';
+import { cookies } from 'next/headers';
+import UploadProvider from '@/app/_component/UploadProvider';
+import MeProvider from '@/app/_component/MeProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -21,22 +26,39 @@ export const metadata: Metadata = {
   title: 'BAND CLOUD',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get('token');
+  const cookieHeader = tokenCookie ? `token=${tokenCookie.value}` : '';
+
+  const response = await api.get<ApiResponse<User>>(process.env.API_HOST + '/api/auth/me', {
+    throwHttpErrors: false,
+    headers: {
+      cookie: cookieHeader,
+    },
+  });
+  const result = await response.json().then((res) => res.result);
+  const initMe = getUserOrFalse(result);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white h-screen`}
       >
         <RQProvider>
-          <CurrentAudioProvider>
-            <NavBar />
-            <div className="p-8 overflow-y-auto h-[calc(100vh-160px)]">{children}</div>
-            <BottomPlayer />
-          </CurrentAudioProvider>
+          <MeProvider initMe={initMe}>
+            <UploadProvider>
+              <CurrentAudioProvider>
+                <NavBar initMe={initMe} />
+                <div className="p-8 overflow-y-auto h-[calc(100vh-160px)]">{children}</div>
+                <BottomPlayer />
+              </CurrentAudioProvider>
+            </UploadProvider>
+          </MeProvider>
         </RQProvider>
         <ToastContainer />
       </body>
