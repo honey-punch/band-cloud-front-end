@@ -53,8 +53,10 @@ export default async function RootLayout({
           <MeProvider initMe={initMe}>
             <UploadProvider>
               <CurrentAudioProvider>
-                <NavBar initMe={initMe} />
-                <div className="p-8 overflow-y-auto h-[calc(100vh-160px)]">{children}</div>
+                <NavBar />
+                <div className="p-8 overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
+                  {children}
+                </div>
                 <BottomPlayer />
               </CurrentAudioProvider>
             </UploadProvider>

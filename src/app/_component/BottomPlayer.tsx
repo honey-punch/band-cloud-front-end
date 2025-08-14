@@ -77,11 +77,11 @@ export default function BottomPlayer() {
   }
 
   return (
-    <div className="h-20 bg-zinc-900 px-8 flex items-center gap-8">
+    <div className="h-20 bg-zinc-900 px-8 flex items-center gap-8 w-full">
       {/* 재생 */}
       <button
         onClick={handleClickPlay}
-        className="w-12 h-12 rounded-full cursor-pointer hover:bg-zinc-200 active:bg-zinc-300 transition-colors bg-white text-black flex items-center pl-1 text-xl justify-center"
+        className="w-12 h-12 shrink-0 grow-0 rounded-full cursor-pointer hover:bg-zinc-200 active:bg-zinc-300 transition-colors bg-white text-black flex items-center pl-1 text-xl justify-center"
       >
         {isPlaying ? <IoMdPause /> : <IoMdPlay />}
       </button>
@@ -124,8 +124,10 @@ export default function BottomPlayer() {
         />
 
         <div>
-          <div className="font-bold">{asset?.title || '선택된 오디오 없음'}</div>
-          <div className="font-bold text-zinc-500">{user?.name || '알 수 없는 사용자'}</div>
+          <div className="font-bold whitespace-nowrap">{asset?.title || '선택된 오디오 없음'}</div>
+          <div className="font-bold whitespace-nowrap text-zinc-500">
+            {user?.name || '알 수 없는 사용자'}
+          </div>
         </div>
       </div>
     </div>

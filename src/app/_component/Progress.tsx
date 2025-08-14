@@ -18,7 +18,7 @@ export default function Progress() {
   const percent = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-4 items-center flex-grow">
       <div className="font-semibold  min-w-[50px]">{secWithMsTohhmmss(currentTime)}</div>
 
       <input
@@ -28,7 +28,7 @@ export default function Progress() {
         step={0.01}
         value={currentTime}
         onChange={handleChangeProgress}
-        className="appearance-none w-[500px] h-1 hover:h-2 custom-progress transition-[height] cursor-pointer"
+        className="appearance-none w-full h-1 hover:h-2 custom-progress transition-[height] cursor-pointer"
         style={
           {
             background: `linear-gradient(to right, #ff6900 ${percent}%, #ddd ${percent}%)`,
