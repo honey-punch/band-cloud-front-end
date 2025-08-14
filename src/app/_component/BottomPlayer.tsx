@@ -77,7 +77,7 @@ export default function BottomPlayer() {
   }
 
   return (
-    <div className="h-20 bg-zinc-800 px-8 flex items-center gap-8">
+    <div className="h-20 bg-zinc-900 px-8 flex items-center gap-8">
       {/* 재생 */}
       <button
         onClick={handleClickPlay}

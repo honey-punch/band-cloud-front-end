@@ -7,6 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { MeContext } from '@/app/_component/MeProvider';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
+import { usePersistStore } from '@/shared/rootStore';
+import { convertFileSizeWithoutZero } from '@/utils/util';
 
 type UploadContextType = {
   isDrawerOpen: boolean;
@@ -28,11 +30,15 @@ export default function UploadProvider({ children }: Props) {
   const drawRef = useRef<HTMLDivElement>(null);
 
   // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  const { me } = useContext(MeContext);
 
   // states
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  const fileItems = usePersistStore((state) => state.fileItems) || [];
+  const updateFiles = usePersistStore((state) => state.updateFiles);
+  const updateUploadedSize = usePersistStore((state) => state.updateUploadedSize);
 
   // hooks
   const queryClient = useQueryClient();
@@ -57,34 +63,44 @@ export default function UploadProvider({ children }: Props) {
   }, [isDrawerOpen]);
 
   // functions
-  function hadleClickUpload() {
-    fileInputRef.current?.click();
-  }
-
   async function uploadFiles(files: File[]) {
     if (!me) {
       return;
     }
 
+    const uploadReadyFiles: (File & { assetId: string; title: string })[] = [];
+
     for (const file of files) {
       const createdAsset = await createAsset({ userId: me.id, originalFileName: file.name });
 
-      if (!createdAsset) {
-        toast("Can't create asset.");
-        return;
+      if (createdAsset) {
+        uploadReadyFiles.push(
+          Object.assign(file, { assetId: createdAsset.id, title: createdAsset.title }),
+        );
+      } else {
+        toast("Can't create asset." + file.name);
       }
+    }
 
-      const chunks = Math.ceil(file.size / CHUNK_SIZE);
+    updateFiles([
+      ...uploadReadyFiles.map((file) => ({
+        assetId: file.assetId,
+        title: file.title,
+        totalSize: file.size,
+        uploadedSize: 0,
+      })),
+      ...fileItems,
+    ]);
 
-      for (let i = 0; i < file.size; i += CHUNK_SIZE) {
-        const start = i * CHUNK_SIZE;
+    for (const file of uploadReadyFiles) {
+      for (let start = 0; start < file.size; start += CHUNK_SIZE) {
         const end = Math.min(start + CHUNK_SIZE, file.size);
         const multipartFile = file.slice(start, end);
 
-        const uploadResponse = await upload({ assetId: createdAsset.id, multipartFile });
+        const uploadResponse = await upload({ assetId: file.assetId, multipartFile });
 
-        if (uploadResponse && i === chunks - 1) {
-          //
+        if (uploadResponse) {
+          updateUploadedSize(file.assetId, end);
         }
       }
     }
@@ -134,9 +150,13 @@ export default function UploadProvider({ children }: Props) {
     e.preventDefault();
   }
 
-  function handleRemoveClick() {}
+  function handleRemoveClick() {
+    updateFiles([]);
+  }
 
-  function handlePlusClick() {}
+  function handlePlusClick() {
+    fileInputRef.current?.click();
+  }
 
   return (
     <UploadContext.Provider
@@ -170,7 +190,7 @@ export default function UploadProvider({ children }: Props) {
           ref={drawRef}
           className={`${isDrawerOpen ? 'right-0' : 'right-[-400px]'} p-6 border-l border-zinc-500 absolute h-full w-[400px] transition-[right] top-0 z-50 bg-zinc-900`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-zinc-500 pb-5">
             <div className="font-semibold text-lg">Upload list</div>
             <div className="flex gap-2 items-center">
               <button
@@ -187,6 +207,26 @@ export default function UploadProvider({ children }: Props) {
                 <FaPlus className="h-3 w-3" />
               </button>
             </div>
+          </div>
+          <div className="flex flex-col gap-4 mt-2">
+            {fileItems.map((fileItem) => (
+              <div key={`file-item-key-${fileItem.assetId}`} className="p-2 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <div className="font-semibold">{fileItem.title}</div>
+                  <div className="text-sm text-zinc-500">
+                    {convertFileSizeWithoutZero(fileItem.uploadedSize)} /
+                    {convertFileSizeWithoutZero(fileItem.totalSize)}
+                  </div>
+                </div>
+
+                <div className="relative w-full h-[6px] rounded-full bg-zinc-500">
+                  <div
+                    style={{ width: `${(fileItem.uploadedSize / fileItem.totalSize) * 100}%` }}
+                    className="absolute h-[6px] rounded-full top-0 left-0 transition-[width] bg-green-500"
+                  ></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
