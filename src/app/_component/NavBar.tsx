@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useContext } from 'react';
 import LoginModal from '@/app/_component/LoginModal';
-import UserMenu from '@/app/_component/UserMenu';
 import { useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa6';
 import { UploadContext } from '@/app/_component/UploadProvider';
 import { MeContext } from '@/app/_component/MeProvider';
+import { useLogout } from '@/hooks/auth/useAuth';
+import PopupMenu from '@/components/PopupMenu';
 
 export default function NavBar() {
   // refs
@@ -14,11 +15,13 @@ export default function NavBar() {
 
   // hooks
   const router = useRouter();
+  const { logout } = useLogout(() => {
+    closeUserMenu();
+    handleChangeMe(null);
+  });
 
   // context
   const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
-
-  // context
   const { setIsDrawerOpen } = useContext(UploadContext);
 
   // states
@@ -27,25 +30,23 @@ export default function NavBar() {
     me ? `/file/avatar/${me.id}` : '/default-avatar.jpg',
   );
 
+  // constants
+  const contentArray = [
+    {
+      text: 'Profile',
+      onClick: () => {
+        router.push('/user');
+      },
+    },
+    {
+      text: 'Sign out',
+      onClick: () => {
+        logout();
+      },
+    },
+  ];
+
   // effects
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        closeUserMenu();
-      }
-    }
-
-    if (isOpenUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpenUserMenu]);
-
   useEffect(() => {
     if (me) {
       setAvatarSrc(`/file/avatar/${me.id}`);
@@ -128,10 +129,11 @@ export default function NavBar() {
 
       {isOpenUserMenu && (
         <div className="absolute right-8 top-18">
-          <UserMenu
-            userMenuRef={userMenuRef}
-            closeUserMenu={closeUserMenu}
-            handleChangeMe={handleChangeMe}
+          <PopupMenu
+            isOpen={isOpenUserMenu}
+            ref={userMenuRef}
+            contentArray={contentArray}
+            closeMenu={closeUserMenu}
           />
         </div>
       )}
