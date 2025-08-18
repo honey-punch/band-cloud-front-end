@@ -134,7 +134,6 @@ export default function UploadProvider({ children }: Props) {
 
   function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
-    console.log(1);
     setIsDragging(true);
   }
 

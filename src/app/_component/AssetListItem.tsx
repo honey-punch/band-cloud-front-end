@@ -1,5 +1,5 @@
 import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
-import { useContext, useState, FormEvent } from 'react';
+import { useContext, useState, FormEvent, useEffect, useRef } from 'react';
 import { FaMessage } from 'react-icons/fa6';
 import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
@@ -7,12 +7,19 @@ import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
 import Reply from '@/app/_component/Reply';
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
+import { FaImage } from 'react-icons/fa';
+import { useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 
 interface AssetListItemProps {
   asset: Asset;
 }
 
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function AssetListItem({ asset }: AssetListItemProps) {
+  //refs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // context
   const { me, setIsOpenLoginModal } = useContext(MeContext);
 
@@ -26,6 +33,14 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   // hooks
   const { createReply } = useCreateReply(asset.id);
   const { replyList } = useReplyByAssetId(asset.id);
+  const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
+    setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+  });
+
+  // effects
+  useEffect(() => {
+    setAvatarSrc(`/file/avatar/${me?.id}`);
+  }, [me]);
 
   // functions
   function handleChangeAudioSrc(audioSrc: string) {
@@ -33,7 +48,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   }
 
   function handleClickReply() {
-    me ? setIsOpenReply(!isOpenReply) : setIsOpenLoginModal(true);
+    setIsOpenReply(!isOpenReply);
   }
 
   function handleSubmitReply(e: FormEvent<HTMLFormElement>) {
@@ -54,8 +69,36 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
     setReply('');
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (!file) return;
+
+    if (file.size > MAX_SIZE) {
+      toast('Upload only files under 10MB');
+      return;
+    }
+
+    updateAssetThumbnail({ assetId: asset.id, multipartFile: file });
+  }
+
+  function handleClickAddImage() {
+    if (!me) {
+      setIsOpenLoginModal(true);
+      return;
+    }
+    fileInputRef.current?.click();
+  }
+
   return (
     <div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg, image/png"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <div className="flex gap-6">
         <img
           src={thumbnailSrc}
@@ -73,12 +116,27 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
           handleChangeAudioSrc={handleChangeAudioSrc}
         />
 
-        <button
-          onClick={handleClickReply}
-          className="self-end cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-2"
-        >
-          <FaMessage />
-        </button>
+        <div className="flex gap-2 self-end">
+          <button
+            onClick={handleClickReply}
+            className={`${isOpenReply ? 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700' : 'hover:bg-zinc-500 active:bg-zinc-600'} cursor-pointer relative text-white  transition-colors rounded-full p-3`}
+          >
+            <FaMessage />
+            {(replyList?.length || 0) > 0 && (
+              <div className="absolute -top-1 -right-1 rounded-full font-semibold bg-red-500 flex items-center justify-center text-xs w-5 h-5">
+                {replyList?.length || ''}
+              </div>
+            )}
+          </button>
+          {me?.id === asset.userId && (
+            <button
+              onClick={handleClickAddImage}
+              className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
+            >
+              <FaImage />
+            </button>
+          )}
+        </div>
       </div>
 
       {isOpenReply && (
@@ -99,6 +157,12 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
                 value={reply}
                 onChange={(e) => {
                   setReply(e.target.value);
+                }}
+                onFocus={() => {
+                  if (!me) {
+                    setIsOpenLoginModal(true);
+                    return;
+                  }
                 }}
                 className="border-b focus:outline-none group-hover:border-white w-full border-zinc-500 focus:border-white transition-colors box-border"
                 placeholder="reply..."

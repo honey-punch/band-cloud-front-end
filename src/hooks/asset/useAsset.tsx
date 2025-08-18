@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createAsset, getAssetById, getAssetSearch } from '@/entries/asset/api';
+import {
+  createAsset,
+  getAssetById,
+  getAssetSearch,
+  updateAssetThumbnail,
+} from '@/entries/asset/api';
 
 export function useAssetSearch() {
   const { data, isPending } = useQuery<Asset[]>({
@@ -40,4 +45,22 @@ export function useCreateAsset(onSuccess?: () => void, onError?: () => void) {
   });
 
   return { createAsset: mutate, isLoadingCreateAsset: isPending };
+}
+
+export function useUpdateAssetThumbnail(onSuccess?: () => void, onError?: () => void) {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation<Asset, Error, UploadBody>({
+    mutationKey: ['asset', 'update', 'thumbnail'],
+    mutationFn: (body: UploadBody) => updateAssetThumbnail(body),
+    onSuccess: () => {
+      // queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      onSuccess && onSuccess();
+    },
+    onError: () => {
+      onError && onError();
+    },
+  });
+
+  return { updateAssetThumbnail: mutate, isLoadingUpdateAssetThumbnail: isPending };
 }

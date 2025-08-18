@@ -69,3 +69,20 @@ export async function upload(body: UploadBody) {
 
   return response.json().then((res) => res.result);
 }
+
+export async function updateAssetThumbnail(body: UploadBody) {
+  const { assetId, multipartFile } = body;
+  const formData = new FormData();
+
+  formData.append('multipartFile', multipartFile);
+
+  const response = await api.put<ApiResponse<Asset>>(`/api/asset/${assetId}/thumbnail`, {
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}
