@@ -4,7 +4,6 @@ import './globals.css';
 import RQProvider from '@/app/_component/RQProvider';
 import NavBar from '@/app/_component/NavBar';
 import BottomPlayer from '@/app/_component/BottomPlayer';
-import CurrentAudioProvider from '@/app/_component/CurrentAudioProvider';
 import { ToastContainer } from 'react-toastify';
 import api from '@/entries';
 import { getUserOrFalse } from '@/utils/util';
@@ -52,13 +51,11 @@ export default async function RootLayout({
         <RQProvider>
           <MeProvider initMe={initMe}>
             <UploadProvider>
-              <CurrentAudioProvider>
-                <NavBar />
-                <div className="p-8 overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
-                  {children}
-                </div>
-                <BottomPlayer />
-              </CurrentAudioProvider>
+              <NavBar />
+              <div className="p-8 overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
+                {children}
+              </div>
+              <BottomPlayer />
             </UploadProvider>
           </MeProvider>
         </RQProvider>

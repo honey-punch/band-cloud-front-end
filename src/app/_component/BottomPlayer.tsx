@@ -1,57 +1,70 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
-import { AudioContext } from '@/app/_component/CurrentAudioProvider';
+import React, { useEffect, useState } from 'react';
+
 import { PiSpeakerSimpleHighFill, PiSpeakerSimpleSlashFill } from 'react-icons/pi';
 import { IoMdPlay, IoMdPause } from 'react-icons/io';
 import { useAssetById } from '@/hooks/asset/useAsset';
 import { useUserById } from '@/hooks/user/useUser';
 import Progress from '@/app/_component/Progress';
+import { useStore } from '@/shared/rootStore';
 
 export default function BottomPlayer() {
-  // context
-  const {
-    volume,
-    setVolume,
-    prevVolume,
-    setPrevVolume,
-    isMuted,
-    setIsMuted,
-    currentWavesurferRef,
-    isPlaying,
-    currentPlayingAssetId,
-  } = useContext(AudioContext);
+  // zustand
+  const audioEl = useStore((state) => state.audioEl);
+  const setAudioEl = useStore((state) => state.setAudioEl);
+  const currentAssetId = useStore((state) => state.currentAssetId);
+  const isPlaying = useStore((state) => state.isPlaying);
+  const setIsPlaying = useStore((state) => state.setIsPlaying);
+  const duration = useStore((state) => state.duration);
+  const setDuration = useStore((state) => state.setDuration);
+  const currentTime = useStore((state) => state.currentTime);
+  const setCurrentTime = useStore((state) => state.setCurrentTime);
 
   // hooks
-  const { asset } = useAssetById(currentPlayingAssetId || '');
+  const { asset } = useAssetById(currentAssetId || '');
   const { user } = useUserById(asset?.userId || '');
 
-  // useState
+  // states
+  const [volume, setVolume] = useState<number>(1);
+  const [prevVolume, setPrevVolume] = useState<number>(1);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [thumbnailSrc, setThumbnailSrc] = useState<string>(
-    currentPlayingAssetId ? `/file/thumbnail/${currentPlayingAssetId}` : '/default-thumbnail.jpg',
+    currentAssetId ? `/file/thumbnail/${currentAssetId}` : '/default-thumbnail.jpg',
   );
 
-  // useEffect
+  // effects
   useEffect(() => {
-    currentPlayingAssetId
-      ? setThumbnailSrc(`/file/thumbnail/${currentPlayingAssetId}`)
-      : setThumbnailSrc('/default-thumbnail.jpg');
-  }, [currentPlayingAssetId]);
+    if (!audioEl) return;
+
+    if (currentAssetId) {
+      setThumbnailSrc(`/file/thumbnail/${currentAssetId}`);
+      audioEl.src = `/file/audio/${currentAssetId}`;
+      audioEl.load();
+    } else {
+      setThumbnailSrc('/default-thumbnail.jpg');
+      audioEl.src = '/default.mp3';
+      audioEl.load();
+    }
+  }, [currentAssetId, audioEl]);
 
   // functions
   function handleChangeVolume(e: React.ChangeEvent<HTMLInputElement>) {
-    const newVolume = parseFloat(e.target.value);
+    if (!audioEl) {
+      return;
+    }
 
-    currentWavesurferRef.current && currentWavesurferRef.current.setVolume(newVolume);
+    const newVolume = Number(e.target.value);
+
+    audioEl.volume = newVolume;
+    setVolume(newVolume);
 
     if (newVolume === 0) {
-      currentWavesurferRef.current && currentWavesurferRef.current.setMuted(true);
       setIsMuted(true);
-      setVolume(newVolume);
+      audioEl.muted = true;
     } else {
-      currentWavesurferRef.current && currentWavesurferRef.current.setMuted(false);
       setIsMuted(false);
-      setVolume(newVolume);
+      audioEl.muted = false;
     }
   }
 
@@ -59,22 +72,38 @@ export default function BottomPlayer() {
     if (volume === 0) {
       return;
     }
+
     setPrevVolume(volume);
   }
 
   function handleClickMute() {
+    if (!audioEl) {
+      return;
+    }
+
+    audioEl.muted = !isMuted;
+    audioEl.volume = isMuted ? prevVolume : 0;
+
     setIsMuted(!isMuted);
     setVolume(isMuted ? prevVolume : 0);
-
-    if (currentWavesurferRef.current) {
-      currentWavesurferRef.current.setMuted(!isMuted);
-      currentWavesurferRef.current.setVolume(isMuted ? prevVolume : 0);
-    }
   }
 
   function handleClickPlay() {
-    currentWavesurferRef.current && currentWavesurferRef.current.playPause();
+    if (!audioEl) {
+      return;
+    }
+
+    audioEl.paused ? audioEl.play() : audioEl.pause();
   }
+
+  const handleChangeProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    setCurrentTime(value);
+
+    if (audioEl) {
+      audioEl.currentTime = value;
+    }
+  };
 
   return (
     <div className="h-20 bg-zinc-900 px-8 flex items-center gap-8 w-full">
@@ -87,10 +116,34 @@ export default function BottomPlayer() {
       </button>
 
       {/*프로그레스*/}
-      <Progress />
+      <Progress
+        duration={duration}
+        currentTime={currentTime}
+        handleChangeProgress={handleChangeProgress}
+      />
+
+      <audio
+        ref={(el) => setAudioEl(el)}
+        controls
+        // autoPlay={!!currentAssetId}
+        onPlay={() => {
+          setIsPlaying(true);
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+        }}
+        onTimeUpdate={(e) => {
+          setCurrentTime(e.currentTarget.currentTime);
+        }}
+        onDurationChange={(e) => {
+          setDuration(e.currentTarget.duration);
+        }}
+        src={currentAssetId ? `/file/audio/${currentAssetId}` : '/default.mp3'}
+        className="hidden"
+      ></audio>
 
       {/* 볼륨 */}
-      <div className="relative group">
+      <div className="relative group z-20">
         <button
           onClick={handleClickMute}
           className="cursor-pointer hover:text-zinc-500 active:bg-zinc-600 transition-colors text-3xl p-6 box-border"
@@ -102,7 +155,7 @@ export default function BottomPlayer() {
           <input
             type="range"
             value={volume}
-            step={0.01}
+            step="0.01"
             min={0}
             max={1}
             onChange={handleChangeVolume}

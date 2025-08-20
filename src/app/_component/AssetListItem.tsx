@@ -9,6 +9,7 @@ import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import { FaImage } from 'react-icons/fa';
 import { useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
+import { useRouter } from 'next/navigation';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -25,7 +26,6 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
 
   // states
   const [thumbnailSrc, setThumbnailSrc] = useState<string>(`/file/thumbnail/${asset.id}`);
-  const [audioSrc, setAudioSrc] = useState<string>(`/file/audio/${asset.id}`);
   const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${me?.id}`);
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
   const [reply, setReply] = useState<string>('');
@@ -36,6 +36,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
   });
+  const router = useRouter();
 
   // effects
   useEffect(() => {
@@ -43,10 +44,6 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   }, [me]);
 
   // functions
-  function handleChangeAudioSrc(audioSrc: string) {
-    setAudioSrc(audioSrc);
-  }
-
   function handleClickReply() {
     setIsOpenReply(!isOpenReply);
   }
@@ -105,15 +102,17 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
           onError={() => {
             setThumbnailSrc('/default-thumbnail.jpg');
           }}
+          onClick={() => {
+            router.push(`/asset/${asset.id}`);
+          }}
           alt="thumbnail"
-          className="w-44 h-44 object-cover"
+          className="w-36 h-36 object-cover cursor-pointer hover:opacity-70 active:opacity-60 transition-opacity"
         />
         <WaveAudioPlayer
           title={asset.title}
           assetId={asset.id}
           userId={asset.userId}
-          src={audioSrc}
-          handleChangeAudioSrc={handleChangeAudioSrc}
+          src={`/file/audio/${asset.id}`}
         />
 
         <div className="flex gap-2 self-end">

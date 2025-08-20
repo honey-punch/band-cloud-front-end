@@ -1,25 +1,19 @@
-import { useContext, CSSProperties } from 'react';
-import { AudioContext } from '@/app/_component/CurrentAudioProvider';
+import { CSSProperties } from 'react';
 import { secWithMsTohhmmss } from '@/utils/util';
 
-export default function Progress() {
-  const { currentWavesurferRef, currentTime, setCurrentTime } = useContext(AudioContext);
-  const duration = currentWavesurferRef.current?.getDuration() || 0;
+interface ProgressProps {
+  duration: number;
+  currentTime: number;
 
-  const handleChangeProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setCurrentTime(value);
+  handleChangeProgress(e: React.ChangeEvent<HTMLInputElement>): void;
+}
 
-    if (currentWavesurferRef.current && duration > 0) {
-      currentWavesurferRef.current.seekTo(value / duration);
-    }
-  };
-
+export default function Progress({ duration, currentTime, handleChangeProgress }: ProgressProps) {
   const percent = duration ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="flex gap-4 items-center flex-grow">
-      <div className="font-semibold  min-w-[50px]">{secWithMsTohhmmss(currentTime)}</div>
+      <div className="font-semibold  min-w-[50px]">{secWithMsTohhmmss(currentTime || 0)}</div>
 
       <input
         type="range"
@@ -36,7 +30,7 @@ export default function Progress() {
         }
       />
 
-      <div className="font-semibold  min-w-[50px]">{secWithMsTohhmmss(duration)}</div>
+      <div className="font-semibold  min-w-[50px]">{secWithMsTohhmmss(duration || 0)}</div>
     </div>
   );
 }
