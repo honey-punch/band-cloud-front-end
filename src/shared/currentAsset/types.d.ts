@@ -13,6 +13,7 @@ interface CurrentAssetState {
 
   currentTime: number;
   setCurrentTime: (currentTime: number) => void;
-}
 
-a;
+  currentThumbnailSrc: string | null;
+  setCurrentThumbnailSrc: (src: string | null) => void;
+}

@@ -17,8 +17,7 @@ export default function Reply({ reply }: ReplyProps) {
   // refs
   const popupMenuRef = useRef<HTMLDivElement>(null);
 
-  // state
-  const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${reply.userId}`);
+  // states
   const [replyValue, setReplyValue] = useState<string>(reply.content);
   const [isOpenReplyMenu, setIsOpenReplyMenu] = useState<boolean>(false);
   const [isUpdateReply, setIsUpdateReply] = useState<boolean>(false);
@@ -67,11 +66,8 @@ export default function Reply({ reply }: ReplyProps) {
   return (
     <div className="flex gap-4 flex-grow relative">
       <img
-        src={avatarSrc}
+        src={`/file/avatar/${reply.userId}`}
         alt="avatar"
-        onError={() => {
-          setAvatarSrc('/default-avatar.jpg');
-        }}
         className="object-cover w-10 h-10 rounded-full"
       />
 

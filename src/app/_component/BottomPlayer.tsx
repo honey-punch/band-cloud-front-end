@@ -20,6 +20,8 @@ export default function BottomPlayer() {
   const setDuration = useStore((state) => state.setDuration);
   const currentTime = useStore((state) => state.currentTime);
   const setCurrentTime = useStore((state) => state.setCurrentTime);
+  const currentThumbnailSrc = useStore((state) => state.currentThumbnailSrc);
+  const setCurrentThumbnailSrc = useStore((state) => state.setCurrentThumbnailSrc);
 
   // hooks
   const { asset } = useAssetById(currentAssetId || '');
@@ -29,22 +31,18 @@ export default function BottomPlayer() {
   const [volume, setVolume] = useState<number>(1);
   const [prevVolume, setPrevVolume] = useState<number>(1);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [thumbnailSrc, setThumbnailSrc] = useState<string>(
-    currentAssetId ? `/file/thumbnail/${currentAssetId}` : '/default-thumbnail.jpg',
-  );
 
   // effects
   useEffect(() => {
     if (!audioEl) return;
 
+    setCurrentThumbnailSrc(`/file/thumbnail/${currentAssetId}`);
+    audioEl.load();
+
     if (currentAssetId) {
-      setThumbnailSrc(`/file/thumbnail/${currentAssetId}`);
       audioEl.src = `/file/audio/${currentAssetId}`;
-      audioEl.load();
     } else {
-      setThumbnailSrc('/default-thumbnail.jpg');
-      audioEl.src = '/default.mp3';
-      audioEl.load();
+      audioEl.src = '';
     }
   }, [currentAssetId, audioEl]);
 
@@ -110,7 +108,8 @@ export default function BottomPlayer() {
       {/* 재생 */}
       <button
         onClick={handleClickPlay}
-        className="w-12 h-12 shrink-0 grow-0 rounded-full cursor-pointer hover:bg-zinc-200 active:bg-zinc-300 transition-colors bg-white text-black flex items-center pl-1 text-xl justify-center"
+        disabled={!audioEl?.src || !currentAssetId}
+        className={`${currentAssetId && 'hover:bg-zinc-200 active:bg-zinc-300 transition-colors'} w-12 h-12 shrink-0 grow-0 rounded-full cursor-pointer  bg-white text-black flex items-center pl-1 text-xl justify-center`}
       >
         {isPlaying ? <IoMdPause /> : <IoMdPlay />}
       </button>
@@ -125,7 +124,6 @@ export default function BottomPlayer() {
       <audio
         ref={(el) => setAudioEl(el)}
         controls
-        // autoPlay={!!currentAssetId}
         onPlay={() => {
           setIsPlaying(true);
         }}
@@ -168,11 +166,8 @@ export default function BottomPlayer() {
       {/* 에셋 정보 */}
       <div className="flex items-center gap-3">
         <img
-          src={thumbnailSrc}
+          src={currentThumbnailSrc || '/file/thumbnail/null'}
           alt="thumbnail"
-          onError={() => {
-            setThumbnailSrc('/default-thumbnail.jpg');
-          }}
           className="w-12 h-12 object-cover"
         />
 

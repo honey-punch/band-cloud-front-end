@@ -10,6 +10,7 @@ import FilledTextButton from '@/components/FilledTextButton';
 import { FaImage } from 'react-icons/fa';
 import { useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
+import { useStore } from '@/shared/rootStore';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -26,22 +27,20 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
 
   // states
   const [thumbnailSrc, setThumbnailSrc] = useState<string>(`/file/thumbnail/${asset.id}`);
-  const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${me?.id}`);
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
   const [reply, setReply] = useState<string>('');
+
+  // zustand
+  const setCurrentThumbnailSrc = useStore((state) => state.setCurrentThumbnailSrc);
 
   // hooks
   const { createReply } = useCreateReply(asset.id);
   const { replyList } = useReplyByAssetId(asset.id);
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+    setCurrentThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
   });
   const router = useRouter();
-
-  // effects
-  useEffect(() => {
-    setAvatarSrc(`/file/avatar/${me?.id}`);
-  }, [me]);
 
   // functions
   function handleClickReply() {
@@ -99,9 +98,6 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
       <div className="flex gap-6">
         <img
           src={thumbnailSrc}
-          onError={() => {
-            setThumbnailSrc('/default-thumbnail.jpg');
-          }}
           onClick={() => {
             router.push(`/asset/${asset.id}`);
           }}
@@ -143,11 +139,8 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
           <form className="flex flex-col gap-4 mb-4" onSubmit={handleSubmitReply}>
             <label className="group flex gap-4 w-full flex-grow mt-4 relative">
               <img
-                src={avatarSrc}
+                src={`/file/avatar/${me?.id}`}
                 alt="avatar"
-                onError={() => {
-                  setAvatarSrc('/default-avatar.jpg');
-                }}
                 className="object-cover w-10 h-10 rounded-full"
               />
 

@@ -26,16 +26,18 @@ export default function NavBar() {
 
   // states
   const [isOpenUserMenu, setIsOpenUserMenu] = useState<boolean>(false);
-  const [avatarSrc, setAvatarSrc] = useState<string>(
-    me ? `/file/avatar/${me.id}` : '/default-avatar.jpg',
-  );
 
   // constants
   const contentArray = [
     {
       text: 'Profile',
       onClick: () => {
-        router.push('/user');
+        if (!me) {
+          setIsOpenLoginModal(true);
+          return;
+        }
+        router.push(`/user/${me?.id}`);
+        setIsOpenUserMenu(false);
       },
     },
     {
@@ -45,13 +47,6 @@ export default function NavBar() {
       },
     },
   ];
-
-  // effects
-  useEffect(() => {
-    if (me) {
-      setAvatarSrc(`/file/avatar/${me.id}`);
-    }
-  }, [me]);
 
   // functions
   function closeUserMenu() {
@@ -94,11 +89,8 @@ export default function NavBar() {
             className="flex items-center gap-4 hover:opacity-70 active:opacity-60 transition-opacity cursor-pointer"
           >
             <img
-              src={avatarSrc}
+              src={`/file/avatar/${me.id}`}
               alt="avatar"
-              onError={() => {
-                setAvatarSrc('/default-avatar.jpg');
-              }}
               className="object-cover w-10 h-10 rounded-full"
             />
             <div className="font-semibold text-lg">{me.name}</div>
