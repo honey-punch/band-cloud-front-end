@@ -1,7 +1,7 @@
 import api from '@/entries';
 
-export async function getAssetSearch() {
-  const response = await api.get<ApiResponse<Asset[]>>('api/asset/search?isDeleted=false', {
+export async function getAssetSearch(params: URLSearchParams) {
+  const response = await api.get<ApiResponse<Asset[]>>('/api/asset/search?' + params, {
     next: {
       tags: ['asset', 'search'],
     },
@@ -14,7 +14,7 @@ export async function getAssetSearch() {
     throw new Error(response.statusText);
   }
 
-  return response.json().then((res) => res.result);
+  return response.json().then((res) => res);
 }
 
 export async function getAssetById(id: string) {

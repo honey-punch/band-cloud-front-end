@@ -20,3 +20,12 @@ type UploadBody = {
   assetId: string;
   multipartFile: Blob;
 };
+
+type SearchAssetParams = {
+  userId: string;
+  title: string;
+  page: number;
+  size: number;
+  sort: string;
+  limit: number;
+};

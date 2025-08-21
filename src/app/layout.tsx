@@ -52,7 +52,7 @@ export default async function RootLayout({
           <MeProvider initMe={initMe}>
             <UploadProvider>
               <NavBar />
-              <div className="p-8 overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
+              <div className="overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
                 {children}
               </div>
               <BottomPlayer />

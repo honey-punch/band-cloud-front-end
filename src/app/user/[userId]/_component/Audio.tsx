@@ -1,22 +1,22 @@
-'use client';
-
 import { useInfiniteAssetSearch } from '@/hooks/asset/useAsset';
-import AssetListItem from '@/app/_component/AssetListItem';
 import { useLayoutEffect, useState } from 'react';
+import AssetListItem from '@/app/_component/AssetListItem';
 import { ClipLoader } from 'react-spinners';
 
-export default function Main() {
-  // states
+interface AudioProps {
+  userId: string;
+}
+
+export default function Audio({ userId }: AudioProps) {
   const [searchAssetParams, setSearchAssetParams] = useState<SearchAssetParams>({
-    userId: '',
+    userId: userId,
     title: '',
     page: 0,
-    size: 6,
+    size: 25,
     sort: 'createdDate,desc',
     limit: 25,
   });
 
-  // hooks
   const {
     assetList,
     isLoadingAssetList,
@@ -33,7 +33,7 @@ export default function Main() {
     const observer = new IntersectionObserver(handleObserver, {
       threshold: 1,
     });
-    const observerTarget = document.getElementById('main-page-observer');
+    const observerTarget = document.getElementById('user-page-observer');
 
     if (observerTarget) {
       observer.observe(observerTarget);
@@ -55,10 +55,9 @@ export default function Main() {
   return (
     <div>
       <div className="flex flex-col gap-10">
-        {assetResultList &&
-          assetResultList.map((asset) => (
-            <AssetListItem key={`asset-list-item-key-${asset.id}`} asset={asset} />
-          ))}
+        {assetResultList.map((asset) => (
+          <AssetListItem key={`user-page-asset-${asset.id}`} asset={asset} />
+        ))}
       </div>
 
       {isFetchingNextPage ? (
@@ -66,7 +65,7 @@ export default function Main() {
           <ClipLoader color={'#ffffff'} />
         </div>
       ) : (
-        <div id="main-page-observer" className="h-2"></div>
+        <div id="user-page-observer" className="h-2"></div>
       )}
     </div>
   );

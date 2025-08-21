@@ -1,20 +1,37 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   createAsset,
   getAssetById,
   getAssetSearch,
   updateAssetThumbnail,
 } from '@/entries/asset/api';
+import { parseParams } from '@/utils/util';
 
-export function useAssetSearch() {
-  const { data, isPending } = useQuery<Asset[]>({
-    queryKey: ['asset', 'search'],
-    queryFn: () => getAssetSearch(),
-    staleTime: 60 * 1_000,
-    gcTime: 120 * 1_000,
-  });
+export function useInfiniteAssetSearch(searchAssetParams: SearchAssetParams) {
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, isRefetching } =
+    useInfiniteQuery<ApiResponse<Asset[]>>({
+      queryKey: ['asset', 'search', JSON.stringify(searchAssetParams)],
+      queryFn: ({ pageParam = 0 }) =>
+        getAssetSearch(parseParams(pageParam as number, searchAssetParams)),
+      getNextPageParam: (lastPage: ApiResponse<Asset[]>) => {
+        if (lastPage.page && lastPage.page.currentPage < lastPage.page.totalPage - 1) {
+          return lastPage.page.currentPage + 1;
+        }
+        return undefined;
+      },
+      initialPageParam: 0,
+      staleTime: 60 * 1_000,
+      gcTime: 120 * 1_000,
+    });
 
-  return { assetList: data, isLoadingAssetList: isPending };
+  return {
+    assetList: data,
+    isLoadingAssetList: isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    isRefetching,
+  };
 }
 
 export function useAssetById(id: string) {

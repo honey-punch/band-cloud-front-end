@@ -93,7 +93,7 @@ export default function NavBar() {
               alt="avatar"
               className="object-cover w-10 h-10 rounded-full"
             />
-            <div className="font-semibold text-lg">{me.name}</div>
+            <div className="font-bold text-lg">{me.name}</div>
           </button>
         </div>
       ) : (
@@ -120,7 +120,7 @@ export default function NavBar() {
       )}
 
       {isOpenUserMenu && (
-        <div className="absolute right-8 top-18">
+        <div className="absolute right-8 top-18 z-40">
           <PopupMenu
             isOpen={isOpenUserMenu}
             ref={userMenuRef}
