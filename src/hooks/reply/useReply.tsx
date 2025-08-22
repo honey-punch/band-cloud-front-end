@@ -1,15 +1,32 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createReply, deleteReply, getReplyByAssetId, updateReply } from '@/entries/reply/api';
+import { parseParams } from '@/utils/util';
 
-export function useReplyByAssetId(assetId: string) {
-  const { data, isPending } = useQuery<Reply[]>({
-    queryKey: ['reply', assetId],
-    queryFn: () => getReplyByAssetId(assetId),
-    staleTime: 60 * 1_000,
-    gcTime: 120 * 1_000,
-  });
+export function useReplyByAssetId(assetId: string, SearchParams: SearchParams) {
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, isRefetching } =
+    useInfiniteQuery<ApiResponse<Reply[]>>({
+      queryKey: ['reply', assetId, JSON.stringify(SearchParams)],
+      queryFn: ({ pageParam = 0 }) =>
+        getReplyByAssetId(assetId, parseParams(pageParam as number, SearchParams)),
+      getNextPageParam: (lastPage: ApiResponse<Reply[]>) => {
+        if (lastPage.page && lastPage.page.currentPage < lastPage.page.totalPage - 1) {
+          return lastPage.page.currentPage + 1;
+        }
+        return undefined;
+      },
+      initialPageParam: 0,
+      staleTime: 60 * 1_000,
+      gcTime: 120 * 1_000,
+    });
 
-  return { replyList: data, isLoadingReplyList: isPending };
+  return {
+    replyList: data,
+    isLoadingReplyList: isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    isRefetching,
+  };
 }
 
 export function useCreateReply(assetId: string, onSuccess?: () => void, onError?: () => void) {

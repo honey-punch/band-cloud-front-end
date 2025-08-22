@@ -1,7 +1,7 @@
 import api from '@/entries';
 
-export async function getReplyByAssetId(assetId: string) {
-  const response = await api.get<ApiResponse<Reply[]>>(`/api/reply/${assetId}?isDeleted=false`, {
+export async function getReplyByAssetId(assetId: string, params: URLSearchParams) {
+  const response = await api.get<ApiResponse<Reply[]>>(`/api/reply/${assetId}?${params}`, {
     next: {
       tags: ['reply', assetId],
     },
@@ -14,7 +14,7 @@ export async function getReplyByAssetId(assetId: string) {
     throw new Error(response.statusText);
   }
 
-  return response.json().then((res) => res.result);
+  return response.json().then((res) => res);
 }
 
 export async function createReply(assetId: string, body: CreateReplyBody) {

@@ -7,3 +7,15 @@ interface ApiResponse<T> {
     size: number;
   };
 }
+
+type SearchParams = {
+  // 에셋
+  userId?: string;
+  title?: string;
+
+  // 기본값
+  page: number;
+  size: number;
+  sort: string;
+  limit: number;
+};

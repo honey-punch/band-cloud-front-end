@@ -7,13 +7,13 @@ import { ClipLoader } from 'react-spinners';
 
 export default function Main() {
   // states
-  const [searchAssetParams, setSearchAssetParams] = useState<SearchAssetParams>({
+  const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     userId: '',
     title: '',
     page: 0,
-    size: 6,
+    size: 25,
     sort: 'createdDate,desc',
-    limit: 25,
+    limit: 9999,
   });
 
   // hooks

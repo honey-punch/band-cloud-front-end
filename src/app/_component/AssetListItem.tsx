@@ -1,16 +1,16 @@
 import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
-import { useContext, useState, FormEvent, useEffect, useRef } from 'react';
+import { useContext, useState, useRef, FormEvent } from 'react';
 import { FaMessage } from 'react-icons/fa6';
 import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
 import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
-import Reply from '@/app/_component/Reply';
-import TextButton from '@/components/TextButton';
-import FilledTextButton from '@/components/FilledTextButton';
 import { FaImage } from 'react-icons/fa';
 import { useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/shared/rootStore';
+import TextButton from '@/components/TextButton';
+import FilledTextButton from '@/components/FilledTextButton';
+import Reply from '@/app/_component/Reply';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -26,16 +26,25 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   const { me, setIsOpenLoginModal } = useContext(MeContext);
 
   // states
+  const [reply, setReply] = useState<string>('');
   const [thumbnailSrc, setThumbnailSrc] = useState<string>(`/file/thumbnail/${asset.id}`);
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
-  const [reply, setReply] = useState<string>('');
+  const [searchReplyParams, setSearchReplyParams] = useState<SearchParams>({
+    page: 0,
+    size: 25,
+    sort: 'createdDate,desc',
+    limit: 9999,
+  });
 
   // zustand
   const setCurrentThumbnailSrc = useStore((state) => state.setCurrentThumbnailSrc);
 
   // hooks
+  const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
+  const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
+  const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
   const { createReply } = useCreateReply(asset.id);
-  const { replyList } = useReplyByAssetId(asset.id);
+
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
     setCurrentThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
@@ -45,24 +54,6 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   // functions
   function handleClickReply() {
     setIsOpenReply(!isOpenReply);
-  }
-
-  function handleSubmitReply(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    if (!reply) {
-      toast('There is no reply for this asset');
-      return;
-    }
-
-    if (!me) {
-      toast('Sign in first');
-      return;
-    }
-
-    createReply({ content: reply, userId: me.id });
-
-    setReply('');
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -83,6 +74,24 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
       return;
     }
     fileInputRef.current?.click();
+  }
+
+  function handleSubmitReply(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!reply) {
+      toast('There is no reply for this asset');
+      return;
+    }
+
+    if (!me) {
+      toast('Sign in first');
+      return;
+    }
+
+    createReply({ content: reply, userId: me.id });
+
+    setReply('');
   }
 
   return (
@@ -117,9 +126,9 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
             className={`${isOpenReply ? 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700' : 'hover:bg-zinc-500 active:bg-zinc-600'} cursor-pointer relative text-white  transition-colors rounded-full p-3`}
           >
             <FaMessage />
-            {(replyList?.length || 0) > 0 && (
+            {totalCount > 0 && (
               <div className="absolute -top-1 -right-1 rounded-full font-semibold bg-red-500 flex items-center justify-center text-xs w-5 h-5">
-                {replyList?.length || ''}
+                {totalCount}
               </div>
             )}
           </button>
@@ -175,8 +184,19 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
           </form>
 
           <div className="flex flex-col gap-4">
-            {replyList &&
-              replyList.map((reply) => <Reply key={`reply-list-key-${reply.id}`} reply={reply} />)}
+            {replyResultList.map((reply) => (
+              <Reply key={`reply-list-key-${reply.id}`} reply={reply} />
+            ))}
+            {hasNextPage && (
+              <div
+                onClick={() => {
+                  fetchNextPage();
+                }}
+                className="w-full bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700 transition-colors flex justify-center font-bold items-center p-2 rounded-full cursor-pointer"
+              >
+                More
+              </div>
+            )}
           </div>
         </div>
       )}

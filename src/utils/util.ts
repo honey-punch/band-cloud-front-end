@@ -61,13 +61,17 @@ function calculateFileSize(fileSize: number, unit: number): FileSize {
   return { size: result, unit };
 }
 
-export function parseParams(page: number, searchParams: SearchAssetParams): URLSearchParams {
+export function parseParams(page: number, searchParams: SearchParams): URLSearchParams {
   const params = {
-    userId: searchParams.userId || '',
-    title: searchParams.title || '',
+    // 에셋
+    ...(searchParams.userId ? { userId: searchParams.userId } : {}),
+    ...(searchParams.title ? { title: searchParams.title } : {}),
+
+    // 기본값
     page,
     size: searchParams.size,
     sort: searchParams.sort,
+    limit: searchParams.limit,
     isDeleted: false,
   };
 

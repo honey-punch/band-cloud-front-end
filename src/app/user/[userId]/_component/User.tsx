@@ -15,7 +15,7 @@ interface TabProps {
   onClick(): void;
 }
 
-type TabMenu = 'audio' | 'group' | 'user';
+type TabMenu = 'audio' | 'band' | 'info';
 
 export default function User({ userId }: UserProps) {
   // hooks
@@ -52,14 +52,14 @@ export default function User({ userId }: UserProps) {
       <div className="pt-[100px] w-full">
         <div className="flex">
           <Tab isCurrent={tabMenu === 'audio'} text="Audio" onClick={() => setTabMenu('audio')} />
-          <Tab isCurrent={tabMenu === 'group'} text="Group" onClick={() => setTabMenu('group')} />
-          <Tab isCurrent={tabMenu === 'user'} text="User" onClick={() => setTabMenu('user')} />
+          <Tab isCurrent={tabMenu === 'band'} text="Band" onClick={() => setTabMenu('band')} />
+          <Tab isCurrent={tabMenu === 'info'} text="Info" onClick={() => setTabMenu('info')} />
         </div>
 
         <div className="p-8">
           {tabMenu === 'audio' && <Audio userId={userId} />}
-          {tabMenu === 'group' && <div>group</div>}
-          {tabMenu === 'user' && <div>user</div>}
+          {tabMenu === 'band' && <div>band</div>}
+          {tabMenu === 'info' && <div>user</div>}
         </div>
       </div>
     </div>

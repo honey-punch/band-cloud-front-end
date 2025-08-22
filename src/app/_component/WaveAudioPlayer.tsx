@@ -3,6 +3,7 @@ import { useUserById } from '@/hooks/user/useUser';
 import { IoMdPlay, IoMdPause } from 'react-icons/io';
 import { useStore } from '@/shared/rootStore';
 import Progress from '@/app/_component/Progress';
+import { useRouter } from 'next/navigation';
 
 interface WaveAudioPlayerProps {
   title: string;
@@ -28,6 +29,7 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
 
   // hooks
   const { user } = useUserById(userId);
+  const router = useRouter();
 
   // states
   const [itemDuration, setItemDuration] = useState<number>(0);
@@ -103,7 +105,14 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
         </button>
         <div>
           <div className="font-bold text-2xl">{title}</div>
-          <div className="font-bold text-2xl text-zinc-500">{user?.name}</div>
+          <div
+            onClick={() => {
+              router.push(`/user/${userId}`);
+            }}
+            className="font-bold text-2xl text-zinc-500 cursor-pointer hover:text-zinc-300 active:text-zinc-400 transition-colors"
+          >
+            {user?.name}
+          </div>
         </div>
       </div>
 
