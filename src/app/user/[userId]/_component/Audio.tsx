@@ -8,7 +8,7 @@ interface AudioProps {
 }
 
 export default function Audio({ userId }: AudioProps) {
-  const [searchAssetParams, setSearchAssetParams] = useState<SearchAssetParams>({
+  const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     userId: userId,
     title: '',
     page: 0,
@@ -54,12 +54,16 @@ export default function Audio({ userId }: AudioProps) {
 
   return (
     <div>
-      <div className="flex flex-col gap-10">
-        {assetResultList.map((asset) => (
-          <AssetListItem key={`user-page-asset-${asset.id}`} asset={asset} />
-        ))}
-      </div>
-
+      {assetResultList.length === 0 && (
+        <div className="text-lg font-semibold">No your Audio. Just drag & drop your music.</div>
+      )}
+      {assetResultList.length > 0 && (
+        <div className="flex flex-col gap-10">
+          {assetResultList.map((asset) => (
+            <AssetListItem key={`user-page-asset-${asset.id}`} asset={asset} />
+          ))}
+        </div>
+      )}
       {isFetchingNextPage ? (
         <div className="flex h-60 w-full items-center justify-center">
           <ClipLoader color={'#ffffff'} />

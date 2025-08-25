@@ -3,6 +3,7 @@
 import { useUserById } from '@/hooks/user/useUser';
 import { useState } from 'react';
 import Audio from './Audio';
+import Band from './Band';
 
 interface UserProps {
   userId: string;
@@ -58,7 +59,7 @@ export default function User({ userId }: UserProps) {
 
         <div className="p-8">
           {tabMenu === 'audio' && <Audio userId={userId} />}
-          {tabMenu === 'band' && <div>band</div>}
+          {tabMenu === 'band' && <Band bandIds={user?.bandIds || []} />}
           {tabMenu === 'info' && <div>user</div>}
         </div>
       </div>
