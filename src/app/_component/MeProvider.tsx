@@ -9,6 +9,8 @@ type MeContextType = {
   setIsOpenLoginModal(value: boolean): void;
   me: User | null;
   setMe(me: User | null): void;
+  avatarSrc: string;
+  setAvatarSrc(avatarSrc: string): void;
 };
 
 export const MeContext = createContext<MeContextType>({
@@ -16,12 +18,15 @@ export const MeContext = createContext<MeContextType>({
   setIsOpenLoginModal: (value: boolean) => {},
   me: null,
   setMe: (me: User | null) => {},
+  avatarSrc: '',
+  setAvatarSrc: (avatarSrc: string) => {},
 });
 
 export default function MeProvider({ children, initMe }: Props) {
   // states
   const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
   const [me, setMe] = useState<User | null>(initMe);
+  const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${me?.id}`);
 
   return (
     <MeContext.Provider
@@ -30,6 +35,8 @@ export default function MeProvider({ children, initMe }: Props) {
         setIsOpenLoginModal,
         me,
         setMe,
+        avatarSrc,
+        setAvatarSrc,
       }}
     >
       {children}

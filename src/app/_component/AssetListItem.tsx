@@ -23,7 +23,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  const { me, setIsOpenLoginModal, avatarSrc } = useContext(MeContext);
 
   // states
   const [reply, setReply] = useState<string>('');
@@ -147,11 +147,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
         <div>
           <form className="flex flex-col gap-4 mb-4" onSubmit={handleSubmitReply}>
             <label className="group flex gap-4 w-full flex-grow mt-4 relative">
-              <img
-                src={`/file/avatar/${me?.id}`}
-                alt="avatar"
-                className="object-cover w-10 h-10 rounded-full"
-              />
+              <img src={avatarSrc} alt="avatar" className="object-cover w-10 h-10 rounded-full" />
 
               <input
                 type="text"

@@ -34,3 +34,20 @@ export async function getUserById(id: string) {
 
   return response.json().then((res) => res.result);
 }
+
+export async function updateUserAvatar(body: AvatarUploadBody) {
+  const { userId, multipartFile } = body;
+  const formData = new FormData();
+
+  formData.append('multipartFile', multipartFile);
+
+  const response = await api.put<ApiResponse<User>>(`/api/user/${userId}/avatar`, {
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}

@@ -28,7 +28,7 @@ export default function Reply({ reply }: ReplyProps) {
   const { deleteReply } = useDeleteReply(reply.assetId, reply.id);
 
   // context
-  const { me } = useContext(MeContext);
+  const { me, avatarSrc } = useContext(MeContext);
 
   // constants
   const canUpdateOrDeleteReply = !!me && !!user && me.id === user.id;
@@ -66,7 +66,7 @@ export default function Reply({ reply }: ReplyProps) {
   return (
     <div className="flex gap-4 flex-grow relative">
       <img
-        src={`/file/avatar/${reply.userId}`}
+        src={reply.userId === me?.id ? avatarSrc : `/file/avatar/${reply.userId}`}
         alt="avatar"
         className="object-cover w-10 h-10 rounded-full"
       />

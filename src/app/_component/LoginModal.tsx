@@ -1,5 +1,6 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useContext } from 'react';
 import { useLogin } from '@/hooks/auth/useAuth';
+import { MeContext } from '@/app/_component/MeProvider';
 
 interface LoginModalProps {
   closeLoginModal(): void;

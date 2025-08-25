@@ -6,3 +6,8 @@ type User = {
   createdDate: string;
   isDeleted: boolean;
 };
+
+type AvatarUploadBody = {
+  userId: string;
+  multipartFile: Blob;
+};

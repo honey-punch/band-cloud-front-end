@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useContext } from 'react';
+import { useState, useRef, useContext } from 'react';
 import LoginModal from '@/app/_component/LoginModal';
 import { useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa6';
@@ -21,7 +21,8 @@ export default function NavBar() {
   });
 
   // context
-  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
+  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal, avatarSrc, setAvatarSrc } =
+    useContext(MeContext);
   const { setIsDrawerOpen } = useContext(UploadContext);
 
   // states
@@ -59,6 +60,7 @@ export default function NavBar() {
 
   function handleChangeMe(me: User | null) {
     setMe(me);
+    setAvatarSrc(`/file/avatar/${me?.id}?t=${Date.now()}`);
   }
 
   return (
@@ -88,11 +90,7 @@ export default function NavBar() {
             }}
             className="flex items-center gap-4 hover:opacity-70 active:opacity-60 transition-opacity cursor-pointer"
           >
-            <img
-              src={`/file/avatar/${me.id}`}
-              alt="avatar"
-              className="object-cover w-10 h-10 rounded-full"
-            />
+            <img src={avatarSrc} alt="avatar" className="object-cover w-10 h-10 rounded-full" />
             <div className="font-bold text-lg">{me.name}</div>
           </button>
         </div>
