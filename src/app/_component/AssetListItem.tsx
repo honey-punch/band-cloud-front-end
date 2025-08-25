@@ -27,7 +27,9 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
 
   // states
   const [reply, setReply] = useState<string>('');
-  const [thumbnailSrc, setThumbnailSrc] = useState<string>(`/file/thumbnail/${asset.id}`);
+  const [thumbnailSrc, setThumbnailSrc] = useState<string>(
+    `/file/thumbnail/${asset.id}?t=${Date.now()}`,
+  );
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
   const [searchReplyParams, setSearchReplyParams] = useState<SearchParams>({
     page: 0,
