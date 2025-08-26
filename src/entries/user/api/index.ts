@@ -51,3 +51,21 @@ export async function updateUserAvatar(body: AvatarUploadBody) {
 
   return response.json().then((res) => res.result);
 }
+
+export async function updateUser(id: string, body: UpdateUserBody) {
+  const response = await api.put<ApiResponse<User>>(`/api/user/${id}`, {
+    next: {
+      tags: ['user', id],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}

@@ -7,6 +7,7 @@ import Band from './Band';
 import { MeContext } from '@/app/_component/MeProvider';
 import { FaImage } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import Info from '@/app/user/[userId]/_component/Info';
 
 interface UserProps {
   userId: string;
@@ -115,7 +116,7 @@ export default function User({ userId }: UserProps) {
         <div className="p-8">
           {tabMenu === 'audio' && <Audio userId={userId} />}
           {tabMenu === 'band' && <Band bandIds={user?.bandIds || []} />}
-          {tabMenu === 'info' && <div>user</div>}
+          {tabMenu === 'info' && <Info user={user} userId={userId} />}
         </div>
       </div>
     </div>

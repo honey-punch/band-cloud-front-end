@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getUserSearch, getUserById, updateUserAvatar } from '@/entries/user/api';
+import { getUserSearch, getUserById, updateUserAvatar, updateUser } from '@/entries/user/api';
 
 export function useUserSearch() {
   const { data, isPending } = useQuery<User[]>({
@@ -39,4 +39,22 @@ export function useUpdateUserAvatar(onSuccess?: () => void, onError?: () => void
   });
 
   return { updateUserAvatar: mutate, isLoadingUpdateUserAvatar: isPending };
+}
+
+export function useUpdateUser(id: string, onSuccess?: (data: User) => void, onError?: () => void) {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation<User, Error, UpdateUserBody>({
+    mutationKey: ['user', 'update', id],
+    mutationFn: (body: UpdateUserBody) => updateUser(id, body),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user', id] });
+      onSuccess && onSuccess(data);
+    },
+    onError: () => {
+      onError && onError();
+    },
+  });
+
+  return { updateUser: mutate, isLoadingUpdateUser: isPending };
 }

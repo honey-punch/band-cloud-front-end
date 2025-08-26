@@ -11,3 +11,9 @@ type AvatarUploadBody = {
   userId: string;
   multipartFile: Blob;
 };
+
+type UpdateUserBody = {
+  name?: string;
+  userId?: string;
+  password?: string;
+};
