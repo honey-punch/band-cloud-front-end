@@ -1,6 +1,5 @@
-import { useState, ChangeEvent, useContext } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { useLogin } from '@/hooks/auth/useAuth';
-import { MeContext } from '@/app/_component/MeProvider';
 
 interface LoginModalProps {
   closeLoginModal(): void;
@@ -36,7 +35,7 @@ export default function LoginModal({ closeLoginModal, handleChangeMe }: LoginMod
     setPassword(e.target.value);
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     login({ userId, password });
   }

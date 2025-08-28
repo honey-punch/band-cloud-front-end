@@ -67,6 +67,9 @@ export function parseParams(page: number, searchParams: SearchParams): URLSearch
     ...(searchParams.userId ? { userId: searchParams.userId } : {}),
     ...(searchParams.title ? { title: searchParams.title } : {}),
 
+    // 밴드
+    ...(searchParams.name ? { name: searchParams.name } : {}),
+
     // 기본값
     page,
     size: searchParams.size,

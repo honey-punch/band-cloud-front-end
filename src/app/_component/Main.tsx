@@ -54,6 +54,8 @@ export default function Main() {
 
   return (
     <div>
+      <div></div>
+      
       <div className="flex flex-col gap-10">
         {assetResultList &&
           assetResultList.map((asset) => (

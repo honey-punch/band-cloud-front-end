@@ -13,6 +13,9 @@ type SearchParams = {
   userId?: string;
   title?: string;
 
+  // 밴드
+  name?: string;
+
   // 기본값
   page: number;
   size: number;

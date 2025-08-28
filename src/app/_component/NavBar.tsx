@@ -2,12 +2,13 @@
 
 import { useState, useRef, useContext } from 'react';
 import LoginModal from '@/app/_component/LoginModal';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa6';
 import { UploadContext } from '@/app/_component/UploadProvider';
 import { MeContext } from '@/app/_component/MeProvider';
 import { useLogout } from '@/hooks/auth/useAuth';
 import PopupMenu from '@/components/PopupMenu';
+import BackDrop from '@/components/BackDrop';
 
 export default function NavBar() {
   // refs
@@ -19,6 +20,7 @@ export default function NavBar() {
     closeUserMenu();
     handleChangeMe(null);
   });
+  const pathname = usePathname();
 
   // context
   const { me, setMe, isOpenLoginModal, setIsOpenLoginModal, avatarSrc, setAvatarSrc } =
@@ -74,6 +76,15 @@ export default function NavBar() {
         BAND CLOUD
       </div>
 
+      <div className="flex gap-10">
+        <NavButton text="Music" isCurrent={pathname === '/'} onClick={() => router.push('/')} />
+        <NavButton
+          text="Band"
+          isCurrent={pathname.startsWith('/band')}
+          onClick={() => router.push('/band')}
+        />
+      </div>
+
       {me ? (
         <div className="flex items-center gap-4">
           <button
@@ -107,14 +118,13 @@ export default function NavBar() {
 
       {/* 모달 */}
       {isOpenLoginModal && (
-        <div
+        <BackDrop
           onClick={() => {
             setIsOpenLoginModal(false);
           }}
-          className="absolute flex justify-center items-center top-0 left-0 w-screen h-screen bg-white/60 z-50"
         >
           <LoginModal closeLoginModal={closeLoginModal} handleChangeMe={handleChangeMe} />
-        </div>
+        </BackDrop>
       )}
 
       {isOpenUserMenu && (
@@ -128,5 +138,22 @@ export default function NavBar() {
         </div>
       )}
     </nav>
+  );
+}
+
+interface NavButtonProps {
+  text: string;
+  isCurrent: boolean;
+  onClick: () => void;
+}
+
+function NavButton({ text, isCurrent, onClick }: NavButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`${isCurrent ? 'bg-zinc-500' : 'hover:bg-zinc-800 active:bg-zinc-900'} rounded-full font-semibold text-lg cursor-pointer transition-colors py-2 px-5`}
+    >
+      {text}
+    </button>
   );
 }

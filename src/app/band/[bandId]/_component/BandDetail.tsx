@@ -2,11 +2,11 @@
 
 import { useBandById } from '@/hooks/band/useBand';
 
-interface BandProps {
+interface BandDetailProps {
   bandId: string;
 }
 
-export default function Band({ bandId }: BandProps) {
+export default function BandDetail({ bandId }: BandDetailProps) {
   const { band } = useBandById(bandId);
 
   return <div>{band?.name}</div>;

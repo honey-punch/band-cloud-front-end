@@ -9,7 +9,7 @@ import { FaImage } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import Info from '@/app/user/[userId]/_component/Info';
 
-interface UserProps {
+interface UserDetailProps {
   userId: string;
 }
 
@@ -22,7 +22,7 @@ interface TabProps {
 
 type TabMenu = 'audio' | 'band' | 'info';
 
-export default function User({ userId }: UserProps) {
+export default function UserDetail({ userId }: UserDetailProps) {
   // refs
   const fileInputRef = useRef<HTMLInputElement>(null);
 

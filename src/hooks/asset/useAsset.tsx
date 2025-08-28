@@ -7,12 +7,12 @@ import {
 } from '@/entries/asset/api';
 import { parseParams } from '@/utils/util';
 
-export function useInfiniteAssetSearch(SearchParams: SearchParams) {
+export function useInfiniteAssetSearch(searchParams: SearchParams) {
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, isRefetching } =
     useInfiniteQuery<ApiResponse<Asset[]>>({
-      queryKey: ['asset', 'search', JSON.stringify(SearchParams)],
+      queryKey: ['asset', 'search', JSON.stringify(searchParams)],
       queryFn: ({ pageParam = 0 }) =>
-        getAssetSearch(parseParams(pageParam as number, SearchParams)),
+        getAssetSearch(parseParams(pageParam as number, searchParams)),
       getNextPageParam: (lastPage: ApiResponse<Asset[]>) => {
         if (lastPage.page && lastPage.page.currentPage < lastPage.page.totalPage - 1) {
           return lastPage.page.currentPage + 1;
