@@ -12,6 +12,8 @@ type SearchParams = {
   // 에셋
   userId?: string[];
   title?: string;
+  isPublic?: boolean;
+  belongBandId?: string;
 
   // 밴드
   name?: string;

@@ -10,6 +10,7 @@ export default function Main() {
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     userId: [],
     title: '',
+    isPublic: true,
     page: 0,
     size: 25,
     sort: 'createdDate,desc',

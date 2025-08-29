@@ -9,6 +9,7 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
 import { usePersistStore } from '@/shared/rootStore';
 import { convertFileSizeWithoutZero } from '@/utils/util';
+import { usePathname } from 'next/navigation';
 
 type UploadContextType = {
   isDrawerOpen: boolean;
@@ -30,7 +31,7 @@ export default function UploadProvider({ children }: Props) {
   const drawRef = useRef<HTMLDivElement>(null);
 
   // context
-  const { me } = useContext(MeContext);
+  const { me, setIsOpenLoginModal } = useContext(MeContext);
 
   // states
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -42,6 +43,9 @@ export default function UploadProvider({ children }: Props) {
 
   // hooks
   const queryClient = useQueryClient();
+  const pathname = usePathname();
+  const isBand = pathname.startsWith('/band/');
+  const bandId = pathname.split('/')[2];
 
   // effects
   useEffect(() => {
@@ -65,13 +69,18 @@ export default function UploadProvider({ children }: Props) {
   // functions
   async function uploadFiles(files: File[]) {
     if (!me) {
+      setIsOpenLoginModal(true);
       return;
     }
 
     const uploadReadyFiles: (File & { assetId: string; title: string })[] = [];
 
     for (const file of files) {
-      const createdAsset = await createAsset({ userId: me.id, originalFileName: file.name });
+      const createdAsset = await createAsset({
+        userId: me.id,
+        originalFileName: file.name,
+        ...(isBand ? { belongBandId: bandId } : {}),
+      });
 
       if (createdAsset) {
         uploadReadyFiles.push(

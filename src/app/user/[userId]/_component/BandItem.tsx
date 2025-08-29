@@ -13,13 +13,20 @@ interface BandItemProps {
 export default function BandItem({ id }: BandItemProps) {
   // hooks
   const { band } = useBandById(id);
-  const { userList } = useUserSearch();
+  const { userList } = useUserSearch({
+    bandId: id,
+    page: 0,
+    size: 5,
+    sort: 'createdDate,desc',
+    limit: 5,
+  });
+  const userListResult = userList?.result;
+  const totalMemberCount = userList?.page?.totalCount || 0;
+
   const bandMemberIds =
-    userList
-      ?.filter((user) => user.bandIds.includes(id))
-      .map((user) => user.id)
+    userListResult
+      ?.map((user) => user.id)
       .sort((a, b) => (a === band?.leaderId ? -1 : b === band?.leaderId ? 1 : 0)) || [];
-  const slicedBandMemberIds = bandMemberIds.slice(0, 5);
 
   const router = useRouter();
 
@@ -50,7 +57,7 @@ export default function BandItem({ id }: BandItemProps) {
       </div>
       <div className="text-lg h-28 line-clamp-4">{band?.description}</div>
       <div className="flex relative w-full">
-        {slicedBandMemberIds.map((id, i) => (
+        {bandMemberIds.map((id, i) => (
           <img
             key={`band-member-avatar-${id}`}
             src={`/file/avatar/${id}`}
@@ -59,7 +66,7 @@ export default function BandItem({ id }: BandItemProps) {
             className="w-10 h-10 rounded-full object-fit absolute"
           ></img>
         ))}
-        {bandMemberIds.length > 5 && (
+        {totalMemberCount > 5 && (
           <div className="w-10 h-10 rounded-full absolute left-[120px] flex items-center justify-center border border-zinc-500 bg-zinc-700">
             <BsThreeDots />
           </div>

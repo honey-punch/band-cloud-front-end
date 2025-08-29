@@ -15,7 +15,7 @@ export async function getUserSearch(params: URLSearchParams) {
     throw new Error(response.statusText);
   }
 
-  return response.json().then((res) => res.result);
+  return response.json().then((res) => res);
 }
 
 export async function getUserById(id: string) {

@@ -3,8 +3,8 @@ import { getUserSearch, getUserById, updateUserAvatar, updateUser } from '@/entr
 import { parseParams } from '@/utils/util';
 
 export function useUserSearch(searchParams: SearchParams) {
-  const { data, isPending } = useQuery<User[]>({
-    queryKey: ['user', 'search'],
+  const { data, isPending } = useQuery<ApiResponse<User[]>>({
+    queryKey: ['user', 'search', JSON.stringify(searchParams)],
     queryFn: () => getUserSearch(parseParams(searchParams)),
     staleTime: 60 * 1_000,
     gcTime: 120 * 1_000,

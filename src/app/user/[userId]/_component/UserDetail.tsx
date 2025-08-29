@@ -108,7 +108,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
         </div>
 
         <div className="p-8">
-          {tabMenu === 'audio' && <Audio userId={userId} />}
+          {tabMenu === 'audio' && <Audio userId={userId} isMe={isMe} />}
           {tabMenu === 'band' && <Band bandIds={user?.bandIds || []} />}
           {tabMenu === 'info' && <Info user={user} userId={userId} />}
         </div>

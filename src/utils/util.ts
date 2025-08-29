@@ -66,6 +66,8 @@ export function parseParamsPage(page: number, searchParams: SearchParams): URLSe
     // 에셋
     ...(searchParams.userId ? { userId: searchParams.userId } : {}),
     ...(searchParams.title ? { title: searchParams.title } : {}),
+    ...(searchParams.isPublic ? { isPublic: searchParams.isPublic } : {}),
+    ...(searchParams.belongBandId ? { belongBandId: searchParams.belongBandId } : {}),
 
     // 밴드
     ...(searchParams.name ? { name: searchParams.name } : {}),
@@ -98,6 +100,8 @@ export function parseParams(searchParams: SearchParams): URLSearchParams {
     // 에셋
     ...(searchParams.userId ? { userId: searchParams.userId } : {}),
     ...(searchParams.title ? { title: searchParams.title } : {}),
+    ...(searchParams.isPublic ? { isPublic: searchParams.isPublic } : {}),
+    ...(searchParams.belongBandId ? { belongBandId: searchParams.belongBandId } : {}),
 
     // 밴드
     ...(searchParams.name ? { name: searchParams.name } : {}),

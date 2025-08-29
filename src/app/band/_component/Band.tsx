@@ -8,7 +8,6 @@ import { FaPlus } from 'react-icons/fa6';
 import BackDrop from '@/components/BackDrop';
 import CreateBandModal from '@/app/band/_component/CreateBandModal';
 import { MeContext } from '@/app/_component/MeProvider';
-import { toast } from 'react-toastify';
 
 export default function Band() {
   // context

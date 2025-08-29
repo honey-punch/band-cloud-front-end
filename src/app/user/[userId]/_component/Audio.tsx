@@ -5,12 +5,14 @@ import { ClipLoader } from 'react-spinners';
 
 interface AudioProps {
   userId: string;
+  isMe: boolean;
 }
 
-export default function Audio({ userId }: AudioProps) {
+export default function Audio({ userId, isMe }: AudioProps) {
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     userId: [userId],
     title: '',
+    ...(isMe ? {} : { isPublic: true }),
     page: 0,
     size: 25,
     sort: 'createdDate,desc',

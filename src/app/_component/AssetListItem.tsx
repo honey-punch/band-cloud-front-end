@@ -122,7 +122,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
           src={`/file/audio/${asset.id}`}
         />
 
-        <div className="flex gap-2 self-end">
+        <div className="flex gap-2 self-end grow shrink">
           <button
             onClick={handleClickReply}
             className={`${isOpenReply ? 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700' : 'hover:bg-zinc-500 active:bg-zinc-600'} cursor-pointer relative text-white  transition-colors rounded-full p-3`}
@@ -135,12 +135,23 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
             )}
           </button>
           {me?.id === asset.userId && (
-            <button
-              onClick={handleClickAddImage}
-              className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
-            >
-              <FaImage />
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleClickAddImage}
+                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
+              >
+                <FaImage />
+              </button>
+
+              <button
+                onClick={() => {
+                  // TODO - 에셋 isPublic 업데이트함수 넣을것
+                }}
+                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
+              >
+                {asset.isPublic ? 'public' : 'no public'}
+              </button>
+            </div>
           )}
         </div>
       </div>

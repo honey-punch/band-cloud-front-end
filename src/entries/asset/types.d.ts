@@ -9,11 +9,13 @@ type Asset = {
   isPublic: boolean;
   description?: string;
   isDeleted: boolean;
+  belongBandId?: string;
 };
 
 type CreateAssetBody = {
   userId: string;
   originalFileName: string;
+  belongBandId?: string;
 };
 
 type UploadBody = {
