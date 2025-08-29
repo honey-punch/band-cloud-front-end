@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createBand, getBandById, getBandSearch } from '@/entries/band/api';
-import { parseParams } from '@/utils/util';
+import { parseParamsPage } from '@/utils/util';
 
 export function useBandById(id: string) {
   const { data } = useQuery<Band>({
@@ -17,7 +17,8 @@ export function useInfiniteBandSearch(searchParams: SearchParams) {
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, isRefetching } =
     useInfiniteQuery<ApiResponse<Band[]>>({
       queryKey: ['band', 'search', JSON.stringify(searchParams)],
-      queryFn: ({ pageParam = 0 }) => getBandSearch(parseParams(pageParam as number, searchParams)),
+      queryFn: ({ pageParam = 0 }) =>
+        getBandSearch(parseParamsPage(pageParam as number, searchParams)),
       getNextPageParam: (lastPage: ApiResponse<Band[]>) => {
         if (lastPage.page && lastPage.page.currentPage < lastPage.page.totalPage - 1) {
           return lastPage.page.currentPage + 1;

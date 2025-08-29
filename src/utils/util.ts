@@ -61,7 +61,7 @@ function calculateFileSize(fileSize: number, unit: number): FileSize {
   return { size: result, unit };
 }
 
-export function parseParams(page: number, searchParams: SearchParams): URLSearchParams {
+export function parseParamsPage(page: number, searchParams: SearchParams): URLSearchParams {
   const params = {
     // 에셋
     ...(searchParams.userId ? { userId: searchParams.userId } : {}),
@@ -69,6 +69,7 @@ export function parseParams(page: number, searchParams: SearchParams): URLSearch
 
     // 밴드
     ...(searchParams.name ? { name: searchParams.name } : {}),
+    ...(searchParams.bandId ? { name: searchParams.bandId } : {}),
 
     // 기본값
     page,
@@ -89,5 +90,37 @@ export function parseParams(page: number, searchParams: SearchParams): URLSearch
       urlSearchParams.set(key, value !== undefined ? value + '' : '');
     }
   });
+  return urlSearchParams;
+}
+
+export function parseParams(searchParams: SearchParams): URLSearchParams {
+  const params = {
+    // 에셋
+    ...(searchParams.userId ? { userId: searchParams.userId } : {}),
+    ...(searchParams.title ? { title: searchParams.title } : {}),
+
+    // 밴드
+    ...(searchParams.name ? { name: searchParams.name } : {}),
+    ...(searchParams.bandId ? { bandId: searchParams.bandId } : {}),
+
+    // 기본값
+    size: searchParams.size,
+    sort: searchParams.sort,
+    limit: searchParams.limit,
+    isDeleted: false,
+  };
+
+  const urlSearchParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        urlSearchParams.append(key, item);
+      });
+    } else {
+      urlSearchParams.set(key, value !== undefined ? value + '' : '');
+    }
+  });
+
   return urlSearchParams;
 }

@@ -10,11 +10,12 @@ interface ApiResponse<T> {
 
 type SearchParams = {
   // 에셋
-  userId?: string;
+  userId?: string[];
   title?: string;
 
   // 밴드
   name?: string;
+  bandId?: string;
 
   // 기본값
   page: number;

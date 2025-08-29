@@ -4,7 +4,7 @@ export default async function Home({ params }: { params: Promise<{ bandId: strin
   const { bandId } = await params;
 
   return (
-    <div className="p-8">
+    <div className="">
       <BandDetail bandId={bandId} />
     </div>
   );

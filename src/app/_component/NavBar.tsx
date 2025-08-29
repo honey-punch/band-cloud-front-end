@@ -67,22 +67,24 @@ export default function NavBar() {
 
   return (
     <nav className="flex h-20 items-center justify-between px-8">
-      <div
-        onClick={() => {
-          router.push('/');
-        }}
-        className="font-bold text-3xl cursor-pointer hover:text-zinc-300 active:text-zinc-400 transition-colors"
-      >
-        BAND CLOUD
-      </div>
+      <div className="flex items-center gap-14">
+        <div
+          onClick={() => {
+            router.push('/');
+          }}
+          className="font-bold text-3xl cursor-pointer hover:text-zinc-300 active:text-zinc-400 transition-colors"
+        >
+          BAND CLOUD
+        </div>
 
-      <div className="flex gap-10">
-        <NavButton text="Music" isCurrent={pathname === '/'} onClick={() => router.push('/')} />
-        <NavButton
-          text="Band"
-          isCurrent={pathname.startsWith('/band')}
-          onClick={() => router.push('/band')}
-        />
+        <div className="flex gap-4">
+          <NavButton text="Music" isCurrent={pathname === '/'} onClick={() => router.push('/')} />
+          <NavButton
+            text="Band"
+            isCurrent={pathname.startsWith('/band')}
+            onClick={() => router.push('/band')}
+          />
+        </div>
       </div>
 
       {me ? (
@@ -151,8 +153,11 @@ function NavButton({ text, isCurrent, onClick }: NavButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`${isCurrent ? 'bg-zinc-500' : 'hover:bg-zinc-800 active:bg-zinc-900'} rounded-full font-semibold text-lg cursor-pointer transition-colors py-2 px-5`}
+      className={`group relative font-semibold text-lg cursor-pointer transition-[border] py-2 px-6`}
     >
+      <div
+        className={`${isCurrent ? 'w-full' : 'w-0 group-hover:w-full bg-zinc-500'} transition-[width,background-color] bottom-0 left-0 absolute h-[2px] bg-white`}
+      ></div>
       {text}
     </button>
   );

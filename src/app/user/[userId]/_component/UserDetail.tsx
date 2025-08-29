@@ -8,16 +8,10 @@ import { MeContext } from '@/app/_component/MeProvider';
 import { FaImage } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import Info from '@/app/user/[userId]/_component/Info';
+import { Tab } from '@/components/Tab';
 
 interface UserDetailProps {
   userId: string;
-}
-
-interface TabProps {
-  isCurrent: boolean;
-  text: string;
-
-  onClick(): void;
 }
 
 type TabMenu = 'audio' | 'band' | 'info';
@@ -120,19 +114,5 @@ export default function UserDetail({ userId }: UserDetailProps) {
         </div>
       </div>
     </div>
-  );
-}
-
-function Tab({ isCurrent, text, onClick }: TabProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={`${isCurrent ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 active:text-zinc-400'} py-4 focus:outline-0 transition-colors text-lg relative group w-1/3 flex justify-center items-center font-bold cursor-pointer`}
-    >
-      {text}
-      <div
-        className={`${isCurrent ? 'w-full bg-white' : 'w-0'} transition-[width] absolute bottom-0 h-[2px]`}
-      ></div>
-    </button>
   );
 }

@@ -9,7 +9,7 @@ interface AudioProps {
 
 export default function Audio({ userId }: AudioProps) {
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
-    userId: userId,
+    userId: [userId],
     title: '',
     page: 0,
     size: 25,

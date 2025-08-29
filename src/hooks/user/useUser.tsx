@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getUserSearch, getUserById, updateUserAvatar, updateUser } from '@/entries/user/api';
+import { parseParams } from '@/utils/util';
 
-export function useUserSearch() {
+export function useUserSearch(searchParams: SearchParams) {
   const { data, isPending } = useQuery<User[]>({
     queryKey: ['user', 'search'],
-    queryFn: () => getUserSearch(),
+    queryFn: () => getUserSearch(parseParams(searchParams)),
     staleTime: 60 * 1_000,
     gcTime: 120 * 1_000,
   });

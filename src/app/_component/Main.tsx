@@ -8,7 +8,7 @@ import { ClipLoader } from 'react-spinners';
 export default function Main() {
   // states
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
-    userId: '',
+    userId: [],
     title: '',
     page: 0,
     size: 25,
@@ -55,7 +55,7 @@ export default function Main() {
   return (
     <div>
       <div></div>
-      
+
       <div className="flex flex-col gap-10">
         {assetResultList &&
           assetResultList.map((asset) => (

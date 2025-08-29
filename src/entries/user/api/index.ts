@@ -1,7 +1,7 @@
 import api from '@/entries';
 
-export async function getUserSearch() {
-  const response = await api.get<ApiResponse<User[]>>(`/api/user/search?isDeleted=false`, {
+export async function getUserSearch(params: URLSearchParams) {
+  const response = await api.get<ApiResponse<User[]>>('/api/user/search?' + params, {
     next: {
       tags: ['user', 'search'],
     },
