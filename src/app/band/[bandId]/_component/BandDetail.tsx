@@ -57,11 +57,6 @@ export default function BandDetail({ bandId }: BandDetailProps) {
         )}
       </div>
 
-      {/*<div>*/}
-      {/*  {userListResult &&*/}
-      {/*    userListResult.map((v) => <div key={`band-audio-user-key-${v.id}`}>{v.name}</div>)}*/}
-      {/*</div>*/}
-
       <div className="flex">
         <Tab isCurrent={tabMenu === 'audio'} text="Audio" onClick={() => setTabMenu('audio')} />
         <Tab isCurrent={tabMenu === 'chat'} text="Chat" onClick={() => setTabMenu('chat')} />

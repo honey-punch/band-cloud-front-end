@@ -1,7 +1,8 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useInfiniteAssetSearch } from '@/hooks/asset/useAsset';
 import { ClipLoader } from 'react-spinners';
 import AssetListItem from '@/app/_component/AssetListItem';
+import SearchInput from '@/components/SearchInput';
 
 interface BandAudioProps {
   bandId: string;
@@ -12,11 +13,13 @@ export default function BandAudio({ bandId }: BandAudioProps) {
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     isPublic: false,
     belongBandId: bandId,
+    title: '',
     page: 0,
     size: 25,
     sort: 'createdDate,desc',
     limit: 25,
   });
+  const [title, setTitle] = useState<string>('');
 
   // hooks
   const {
@@ -45,6 +48,20 @@ export default function BandAudio({ bandId }: BandAudioProps) {
     };
   }, [isLoadingAssetList]);
 
+  // 검색 디바운싱
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchAssetParams({
+        ...searchAssetParams,
+        title,
+      });
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [title]);
+
   // functions
   function handleObserver(entries: IntersectionObserverEntry[]) {
     const target = entries[0];
@@ -56,6 +73,13 @@ export default function BandAudio({ bandId }: BandAudioProps) {
 
   return (
     <div>
+      <div className="mb-8 flex items-center relative">
+        <SearchInput
+          value={title}
+          placeholder="Find music."
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
       {assetListResult.length === 0 && (
         <div className="text-lg font-semibold">No your Audio. Just drag & drop your music.</div>
       )}

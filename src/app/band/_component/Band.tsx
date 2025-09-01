@@ -8,6 +8,7 @@ import { FaPlus } from 'react-icons/fa6';
 import BackDrop from '@/components/BackDrop';
 import CreateBandModal from '@/app/band/_component/CreateBandModal';
 import { MeContext } from '@/app/_component/MeProvider';
+import SearchInput from '@/components/SearchInput';
 
 export default function Band() {
   // context
@@ -81,11 +82,9 @@ export default function Band() {
   return (
     <div>
       <div className="mb-8 flex items-center relative">
-        <input
-          type="text"
-          className="bg-white text-black py-3 px-6 rounded-full focus:outline-none mx-auto"
-          placeholder="Find band."
+        <SearchInput
           value={name}
+          placeholder="Find band."
           onChange={(e) => setName(e.target.value)}
         />
 

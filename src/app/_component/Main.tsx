@@ -2,8 +2,9 @@
 
 import { useInfiniteAssetSearch } from '@/hooks/asset/useAsset';
 import AssetListItem from '@/app/_component/AssetListItem';
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
+import SearchInput from '@/components/SearchInput';
 
 export default function Main() {
   // states
@@ -16,6 +17,7 @@ export default function Main() {
     sort: 'createdDate,desc',
     limit: 9999,
   });
+  const [title, setTitle] = useState<string>('');
 
   // hooks
   const {
@@ -44,6 +46,20 @@ export default function Main() {
     };
   }, [isLoadingAssetList]);
 
+  // 검색 디바운싱
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchAssetParams({
+        ...searchAssetParams,
+        title,
+      });
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [title]);
+
   // functions
   function handleObserver(entries: IntersectionObserverEntry[]) {
     const target = entries[0];
@@ -55,7 +71,13 @@ export default function Main() {
 
   return (
     <div>
-      <div></div>
+      <div className="mb-8 flex items-center">
+        <SearchInput
+          value={title}
+          placeholder="Find music."
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
       <div className="flex flex-col gap-10">
         {assetResultList &&
