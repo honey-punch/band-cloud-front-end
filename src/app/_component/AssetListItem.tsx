@@ -26,6 +26,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
   // context
   const { me, setIsOpenLoginModal, avatarSrc } = useContext(MeContext);
+  const isMe = me?.id === asset.userId;
 
   // states
   const [reply, setReply] = useState<string>('');
@@ -123,6 +124,8 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
           assetId={asset.id}
           userId={asset.userId}
           src={`/file/audio/${asset.id}`}
+          searchParams={searchParams}
+          isMe={isMe}
         />
 
         <div className="flex gap-2 self-end grow shrink">

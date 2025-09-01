@@ -4,15 +4,25 @@ import { IoMdPlay, IoMdPause } from 'react-icons/io';
 import { useStore } from '@/shared/rootStore';
 import Progress from '@/app/_component/Progress';
 import { useRouter } from 'next/navigation';
+import { useUpdateAsset } from '@/hooks/asset/useAsset';
 
 interface WaveAudioPlayerProps {
   title: string;
   assetId: string;
   userId: string;
   src: string;
+  searchParams: SearchParams;
+  isMe: boolean;
 }
 
-export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAudioPlayerProps) {
+export default function WaveAudioPlayer({
+  title,
+  assetId,
+  userId,
+  src,
+  searchParams,
+  isMe,
+}: WaveAudioPlayerProps) {
   // useRef
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -30,9 +40,11 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
   // hooks
   const { user } = useUserById(userId);
   const router = useRouter();
+  const { updateAsset } = useUpdateAsset(assetId, searchParams);
 
   // states
   const [itemDuration, setItemDuration] = useState<number>(0);
+  const [titleValue, setTitleValue] = useState<string>(title);
 
   // effects
   useEffect(() => {
@@ -52,6 +64,16 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [audioRef.current]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateAsset({ title: titleValue });
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [titleValue]);
 
   // functions
   function onPlayPause() {
@@ -104,7 +126,18 @@ export default function WaveAudioPlayer({ title, assetId, userId, src }: WaveAud
           {isCurrent && isPlaying ? <IoMdPause /> : <IoMdPlay />}
         </button>
         <div>
-          <div className="font-bold text-2xl">{title}</div>
+          {isMe ? (
+            <input
+              type="text"
+              value={titleValue}
+              onChange={(e) => {
+                setTitleValue(e.target.value);
+              }}
+              className="font-bold text-2xl focus:outline-none"
+            />
+          ) : (
+            <div className="font-bold text-2xl">{title}</div>
+          )}
           <div
             onClick={() => {
               router.push(`/user/${userId}`);

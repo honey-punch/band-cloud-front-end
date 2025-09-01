@@ -77,24 +77,28 @@ export function useUpdateAsset(
     mutationKey: ['asset', 'update', id],
     mutationFn: (body: UpdateAssetBody) => updateAsset(id, body),
     onSuccess: (data) => {
-      const cachedAssetsKey = ['asset', 'search', JSON.stringify(searchParams)];
+      const cachedAssetsKey = ['asset', 'search'];
 
-      const prevData = queryClient.getQueryData<{
+      const allCachedAssets = queryClient.getQueriesData<{
         pages: ApiResponse<Asset[]>[];
         pageParams: unknown[];
-      }>(cachedAssetsKey);
+      }>({ queryKey: cachedAssetsKey });
 
-      if (prevData) {
-        const updatedPages = prevData.pages.map((page) => ({
-          ...page,
-          result: page.result.map((asset) =>
-            asset.id === data.id ? { ...asset, ...data } : asset,
-          ),
-        }));
+      if (allCachedAssets) {
+        allCachedAssets.forEach(([cacheKey, cachedValue]) => {
+          if (cachedValue) {
+            const updatedPages = cachedValue.pages.map((page) => ({
+              ...page,
+              result: page.result.map((asset) =>
+                asset.id === data.id ? { ...asset, ...data } : asset,
+              ),
+            }));
 
-        queryClient.setQueryData(cachedAssetsKey, {
-          ...prevData,
-          pages: updatedPages,
+            queryClient.setQueryData(cacheKey, {
+              ...cachedValue,
+              pages: updatedPages,
+            });
+          }
         });
       }
 
