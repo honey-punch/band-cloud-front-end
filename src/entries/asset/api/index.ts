@@ -52,6 +52,24 @@ export async function createAsset(body: CreateAssetBody) {
   return response.json().then((res) => res.result);
 }
 
+export async function updateAsset(id: string, body: UpdateAssetBody) {
+  const response = await api.put<ApiResponse<Asset>>(`/api/asset/${id}`, {
+    next: {
+      tags: ['asset', id],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res.result);
+}
+
 export async function upload(body: UploadBody) {
   const { assetId, multipartFile } = body;
   const formData = new FormData();

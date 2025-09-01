@@ -5,10 +5,9 @@ import AssetListItem from '@/app/_component/AssetListItem';
 
 interface BandAudioProps {
   bandId: string;
-  band?: Band;
 }
 
-export default function BandAudio({ bandId, band }: BandAudioProps) {
+export default function BandAudio({ bandId }: BandAudioProps) {
   // states
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     isPublic: false,
@@ -61,7 +60,11 @@ export default function BandAudio({ bandId, band }: BandAudioProps) {
         <div className="text-lg font-semibold">No your Audio. Just drag & drop your music.</div>
       )}
       {assetListResult.map((v) => (
-        <AssetListItem key={`band-audio-asset-key-${v.id}`} asset={v} />
+        <AssetListItem
+          key={`band-audio-asset-key-${v.id}`}
+          asset={v}
+          searchParams={searchAssetParams}
+        />
       ))}
       {isFetchingNextPage ? (
         <div className="flex h-60 w-full items-center justify-center">

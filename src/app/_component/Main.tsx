@@ -60,7 +60,11 @@ export default function Main() {
       <div className="flex flex-col gap-10">
         {assetResultList &&
           assetResultList.map((asset) => (
-            <AssetListItem key={`asset-list-item-key-${asset.id}`} asset={asset} />
+            <AssetListItem
+              key={`asset-list-item-key-${asset.id}`}
+              asset={asset}
+              searchParams={searchAssetParams}
+            />
           ))}
       </div>
 

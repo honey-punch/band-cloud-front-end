@@ -3,6 +3,7 @@ import {
   createAsset,
   getAssetById,
   getAssetSearch,
+  updateAsset,
   updateAssetThumbnail,
 } from '@/entries/asset/api';
 import { parseParamsPage } from '@/utils/util';
@@ -64,6 +65,49 @@ export function useCreateAsset(onSuccess?: () => void, onError?: () => void) {
   return { createAsset: mutate, isLoadingCreateAsset: isPending };
 }
 
+export function useUpdateAsset(
+  id: string,
+  searchParams: SearchParams,
+  onSuccess?: () => void,
+  onError?: () => void,
+) {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation<Asset, Error, UpdateAssetBody>({
+    mutationKey: ['asset', 'update', id],
+    mutationFn: (body: UpdateAssetBody) => updateAsset(id, body),
+    onSuccess: (data) => {
+      const cachedAssetsKey = ['asset', 'search', JSON.stringify(searchParams)];
+
+      const prevData = queryClient.getQueryData<{
+        pages: ApiResponse<Asset[]>[];
+        pageParams: unknown[];
+      }>(cachedAssetsKey);
+
+      if (prevData) {
+        const updatedPages = prevData.pages.map((page) => ({
+          ...page,
+          result: page.result.map((asset) =>
+            asset.id === data.id ? { ...asset, ...data } : asset,
+          ),
+        }));
+
+        queryClient.setQueryData(cachedAssetsKey, {
+          ...prevData,
+          pages: updatedPages,
+        });
+      }
+
+      onSuccess && onSuccess();
+    },
+    onError: () => {
+      onError && onError();
+    },
+  });
+
+  return { updateAsset: mutate, isLoadingUpdateAsset: isPending };
+}
+
 export function useUpdateAssetThumbnail(onSuccess?: () => void, onError?: () => void) {
   const queryClient = useQueryClient();
 
@@ -71,7 +115,6 @@ export function useUpdateAssetThumbnail(onSuccess?: () => void, onError?: () => 
     mutationKey: ['asset', 'update', 'thumbnail'],
     mutationFn: (body: UploadBody) => updateAssetThumbnail(body),
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       onSuccess && onSuccess();
     },
     onError: () => {

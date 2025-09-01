@@ -92,6 +92,7 @@ export function parseParamsPage(page: number, searchParams: SearchParams): URLSe
       urlSearchParams.set(key, value !== undefined ? value + '' : '');
     }
   });
+
   return urlSearchParams;
 }
 

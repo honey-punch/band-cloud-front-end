@@ -5,20 +5,22 @@ import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
 import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
 import { FaImage } from 'react-icons/fa';
-import { useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
+import { useUpdateAsset, useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/shared/rootStore';
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import Reply from '@/app/_component/Reply';
+import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
 
 interface AssetListItemProps {
   asset: Asset;
+  searchParams: SearchParams;
 }
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
-export default function AssetListItem({ asset }: AssetListItemProps) {
+export default function AssetListItem({ asset, searchParams }: AssetListItemProps) {
   //refs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +48,7 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
   const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
   const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
   const { createReply } = useCreateReply(asset.id);
+  const { updateAsset } = useUpdateAsset(asset.id, searchParams);
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
@@ -145,11 +148,11 @@ export default function AssetListItem({ asset }: AssetListItemProps) {
 
               <button
                 onClick={() => {
-                  // TODO - 에셋 isPublic 업데이트함수 넣을것
+                  updateAsset({ isPublic: !asset.isPublic });
                 }}
-                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
+                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3 text-xl"
               >
-                {asset.isPublic ? 'public' : 'no public'}
+                {asset.isPublic ? <GiCardboardBox /> : <GiCardboardBoxClosed />}
               </button>
             </div>
           )}

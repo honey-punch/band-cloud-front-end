@@ -62,7 +62,11 @@ export default function Audio({ userId, isMe }: AudioProps) {
       {assetResultList.length > 0 && (
         <div className="flex flex-col gap-10">
           {assetResultList.map((asset) => (
-            <AssetListItem key={`user-page-asset-${asset.id}`} asset={asset} />
+            <AssetListItem
+              key={`user-page-asset-${asset.id}`}
+              asset={asset}
+              searchParams={searchAssetParams}
+            />
           ))}
         </div>
       )}

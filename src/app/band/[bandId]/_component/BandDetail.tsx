@@ -69,7 +69,7 @@ export default function BandDetail({ bandId }: BandDetailProps) {
       </div>
 
       <div className="p-8">
-        {tabMenu === 'audio' && <BandAudio bandId={bandId} band={band} />}
+        {tabMenu === 'audio' && <BandAudio bandId={bandId} />}
         {tabMenu === 'chat' && <div>chat</div>}
         {tabMenu === 'user' && <div>user</div>}
       </div>
