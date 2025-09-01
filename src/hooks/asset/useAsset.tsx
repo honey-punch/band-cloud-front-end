@@ -77,12 +77,10 @@ export function useUpdateAsset(
     mutationKey: ['asset', 'update', id],
     mutationFn: (body: UpdateAssetBody) => updateAsset(id, body),
     onSuccess: (data) => {
-      const cachedAssetsKey = ['asset', 'search'];
-
       const allCachedAssets = queryClient.getQueriesData<{
         pages: ApiResponse<Asset[]>[];
         pageParams: unknown[];
-      }>({ queryKey: cachedAssetsKey });
+      }>({ queryKey: ['asset', 'search'] });
 
       if (allCachedAssets) {
         allCachedAssets.forEach(([cacheKey, cachedValue]) => {

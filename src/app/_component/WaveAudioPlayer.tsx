@@ -133,7 +133,7 @@ export default function WaveAudioPlayer({
               onChange={(e) => {
                 setTitleValue(e.target.value);
               }}
-              className="font-bold text-2xl focus:outline-none"
+              className="font-bold text-2xl focus:outline-none hover:text-zinc-300 transition-colors"
             />
           ) : (
             <div className="font-bold text-2xl">{title}</div>
