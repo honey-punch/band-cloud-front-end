@@ -40,7 +40,7 @@ export default function WaveAudioPlayer({
   // hooks
   const { user } = useUserById(userId);
   const router = useRouter();
-  const { updateAsset } = useUpdateAsset(assetId, searchParams);
+  const { updateAsset } = useUpdateAsset(assetId);
 
   // states
   const [itemDuration, setItemDuration] = useState<number>(0);

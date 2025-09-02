@@ -65,12 +65,7 @@ export function useCreateAsset(onSuccess?: () => void, onError?: () => void) {
   return { createAsset: mutate, isLoadingCreateAsset: isPending };
 }
 
-export function useUpdateAsset(
-  id: string,
-  searchParams: SearchParams,
-  onSuccess?: () => void,
-  onError?: () => void,
-) {
+export function useUpdateAsset(id: string, onSuccess?: () => void, onError?: () => void) {
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation<Asset, Error, UpdateAssetBody>({

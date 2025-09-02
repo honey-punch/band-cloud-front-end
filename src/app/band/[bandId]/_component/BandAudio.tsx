@@ -80,16 +80,21 @@ export default function BandAudio({ bandId }: BandAudioProps) {
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
+
       {assetListResult.length === 0 && (
         <div className="text-lg font-semibold">No your Audio. Just drag & drop your music.</div>
       )}
-      {assetListResult.map((v) => (
-        <AssetListItem
-          key={`band-audio-asset-key-${v.id}`}
-          asset={v}
-          searchParams={searchAssetParams}
-        />
-      ))}
+
+      <div className="flex flex-col gap-10">
+        {assetListResult.map((v) => (
+          <AssetListItem
+            key={`band-audio-asset-key-${v.id}`}
+            asset={v}
+            searchParams={searchAssetParams}
+          />
+        ))}
+      </div>
+
       {isFetchingNextPage ? (
         <div className="flex h-60 w-full items-center justify-center">
           <ClipLoader color={'#ffffff'} />

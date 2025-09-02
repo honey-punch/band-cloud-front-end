@@ -8,12 +8,13 @@ import { toast } from 'react-toastify';
 import { Tab } from '@/components/Tab';
 import BandAudio from '@/app/band/[bandId]/_component/BandAudio';
 import { useUserSearch } from '@/hooks/user/useUser';
+import BandBoard from '@/app/band/[bandId]/_component/BandBoard';
 
 interface BandDetailProps {
   bandId: string;
 }
 
-type TabMenu = 'audio' | 'chat' | 'user';
+type TabMenu = 'audio' | 'board' | 'user';
 
 export default function BandDetail({ bandId }: BandDetailProps) {
   // context
@@ -59,13 +60,13 @@ export default function BandDetail({ bandId }: BandDetailProps) {
 
       <div className="flex">
         <Tab isCurrent={tabMenu === 'audio'} text="Audio" onClick={() => setTabMenu('audio')} />
-        <Tab isCurrent={tabMenu === 'chat'} text="Chat" onClick={() => setTabMenu('chat')} />
+        <Tab isCurrent={tabMenu === 'board'} text="Board" onClick={() => setTabMenu('board')} />
         <Tab isCurrent={tabMenu === 'user'} text="User" onClick={() => setTabMenu('user')} />
       </div>
 
       <div className="p-8">
         {tabMenu === 'audio' && <BandAudio bandId={bandId} />}
-        {tabMenu === 'chat' && <div>chat</div>}
+        {tabMenu === 'board' && <BandBoard bandId={bandId} />}
         {tabMenu === 'user' && <div>user</div>}
       </div>
     </div>

@@ -1,13 +1,13 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createReply, deleteReply, getReplyByAssetId, updateReply } from '@/entries/reply/api';
-import { parseParams } from '@/utils/util';
+import { parseParamsPage } from '@/utils/util';
 
-export function useReplyByAssetId(assetId: string, SearchParams: SearchParams) {
+export function useReplyByAssetId(assetId: string, searchParams: SearchParams) {
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, isRefetching } =
     useInfiniteQuery<ApiResponse<Reply[]>>({
-      queryKey: ['reply', assetId, JSON.stringify(SearchParams)],
+      queryKey: ['reply', assetId, JSON.stringify(searchParams)],
       queryFn: ({ pageParam = 0 }) =>
-        getReplyByAssetId(assetId, parseParams(pageParam as number, SearchParams)),
+        getReplyByAssetId(assetId, parseParamsPage(pageParam as number, searchParams)),
       getNextPageParam: (lastPage: ApiResponse<Reply[]>) => {
         if (lastPage.page && lastPage.page.currentPage < lastPage.page.totalPage - 1) {
           return lastPage.page.currentPage + 1;
@@ -59,12 +59,7 @@ export function useUpdateReply(
     mutationKey: ['reply', 'update', replyId],
     mutationFn: (body: UpdateReplyBody) => updateReply(replyId, body),
     onSuccess: (data) => {
-      queryClient.setQueryData<Reply[]>(['reply', assetId], (prevData) => {
-        if (!prevData) {
-          return prevData;
-        }
-        return prevData.map((reply) => (reply.id === data.id ? data : reply));
-      });
+      queryClient.invalidateQueries({ queryKey: ['reply', assetId] });
 
       onSuccess && onSuccess();
     },
@@ -88,12 +83,7 @@ export function useDeleteReply(
     mutationKey: ['reply', 'delete'],
     mutationFn: () => deleteReply(replyId),
     onSuccess: (data) => {
-      queryClient.setQueryData<Reply[]>(['reply', assetId], (prevData) => {
-        if (!prevData) {
-          return prevData;
-        }
-        return prevData.filter((reply) => reply.id !== data.id);
-      });
+      queryClient.invalidateQueries({ queryKey: ['reply', assetId] });
 
       onSuccess && onSuccess();
     },

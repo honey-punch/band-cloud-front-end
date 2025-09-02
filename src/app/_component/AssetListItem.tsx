@@ -1,5 +1,5 @@
 import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
-import { useContext, useState, useRef, FormEvent } from 'react';
+import { useContext, useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { FaMessage } from 'react-icons/fa6';
 import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
@@ -8,10 +8,9 @@ import { FaImage } from 'react-icons/fa';
 import { useUpdateAsset, useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/shared/rootStore';
-import TextButton from '@/components/TextButton';
-import FilledTextButton from '@/components/FilledTextButton';
 import Reply from '@/app/_component/Reply';
 import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
+import TextForm from '@/components/TextForm';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -25,7 +24,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // context
-  const { me, setIsOpenLoginModal, avatarSrc } = useContext(MeContext);
+  const { me, setIsOpenLoginModal } = useContext(MeContext);
   const isMe = me?.id === asset.userId;
 
   // states
@@ -48,8 +47,10 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
   const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
   const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
-  const { createReply } = useCreateReply(asset.id);
-  const { updateAsset } = useUpdateAsset(asset.id, searchParams);
+  const { createReply } = useCreateReply(asset.id, () => {
+    setReply('');
+  });
+  const { updateAsset } = useUpdateAsset(asset.id);
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
@@ -62,7 +63,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
     setIsOpenReply(!isOpenReply);
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files ? e.target.files[0] : null;
     if (!file) return;
 
@@ -96,8 +97,6 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
     }
 
     createReply({ content: reply, userId: me.id });
-
-    setReply('');
   }
 
   return (
@@ -164,39 +163,15 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
       {isOpenReply && (
         <div>
-          <form className="flex flex-col gap-4 mb-4" onSubmit={handleSubmitReply}>
-            <label className="group flex gap-4 w-full flex-grow mt-4 relative">
-              <img src={avatarSrc} alt="avatar" className="object-cover w-10 h-10 rounded-full" />
-
-              <input
-                type="text"
-                value={reply}
-                onChange={(e) => {
-                  setReply(e.target.value);
-                }}
-                onFocus={() => {
-                  if (!me) {
-                    setIsOpenLoginModal(true);
-                    return;
-                  }
-                }}
-                className="border-b focus:outline-none group-hover:border-white w-full border-zinc-500 focus:border-white transition-colors box-border"
-                placeholder="reply..."
-              />
-
-              <div className="group-focus-within:w-[calc(100%-56px)] w-0 transition-[width] duration-500 h-[1px] left-[56px] absolute -bottom-[1px] bg-white"></div>
-            </label>
-
-            <div className="flex gap-2 self-end">
-              <TextButton
-                text="Cancel"
-                onClick={() => {
-                  setReply('');
-                }}
-              />
-              <FilledTextButton text="Add" type="submit" />
-            </div>
-          </form>
+          <div className="mb-4">
+            <TextForm
+              value={reply}
+              placeholder="Write a reply..."
+              onChange={(e) => setReply(e.target.value)}
+              onSubmit={handleSubmitReply}
+              clear={() => setReply('')}
+            />
+          </div>
 
           <div className="flex flex-col gap-4">
             {replyResultList.map((reply) => (
