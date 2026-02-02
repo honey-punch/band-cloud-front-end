@@ -71,29 +71,9 @@ export function useUpdateAsset(id: string, onSuccess?: () => void, onError?: () 
   const { mutate, isPending } = useMutation<Asset, Error, UpdateAssetBody>({
     mutationKey: ['asset', 'update', id],
     mutationFn: (body: UpdateAssetBody) => updateAsset(id, body),
-    onSuccess: (data) => {
-      const allCachedAssets = queryClient.getQueriesData<{
-        pages: ApiResponse<Asset[]>[];
-        pageParams: unknown[];
-      }>({ queryKey: ['asset', 'search'] });
-
-      if (allCachedAssets) {
-        allCachedAssets.forEach(([cacheKey, cachedValue]) => {
-          if (cachedValue) {
-            const updatedPages = cachedValue.pages.map((page) => ({
-              ...page,
-              result: page.result.map((asset) =>
-                asset.id === data.id ? { ...asset, ...data } : asset,
-              ),
-            }));
-
-            queryClient.setQueryData(cacheKey, {
-              ...cachedValue,
-              pages: updatedPages,
-            });
-          }
-        });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset', 'search'] });
+      queryClient.invalidateQueries({ queryKey: ['asset', id] });
 
       onSuccess && onSuccess();
     },

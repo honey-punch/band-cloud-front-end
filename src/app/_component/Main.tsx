@@ -2,16 +2,20 @@
 
 import { useInfiniteAssetSearch } from '@/hooks/asset/useAsset';
 import AssetListItem from '@/app/_component/AssetListItem';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import SearchInput from '@/components/SearchInput';
+import { MeContext } from '@/app/_component/MeProvider';
 
 export default function Main() {
+  // context
+  const { me } = useContext(MeContext);
+
   // states
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
+    currentUserId: '',
     userId: [],
     title: '',
-    isPublic: true,
     page: 0,
     size: 25,
     sort: 'createdDate,desc',
@@ -49,16 +53,21 @@ export default function Main() {
   // 검색 디바운싱
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearchAssetParams({
-        ...searchAssetParams,
+      setSearchAssetParams((prev) => ({
+        ...prev,
         title,
-      });
+      }));
     }, 500);
 
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [title]);
+
+  useEffect(() => {
+    setSearchAssetParams((prev) => ({
+      ...prev,
+      currentUserId: me ? me.id : '',
+    }));
+  }, [me]);
 
   // functions
   function handleObserver(entries: IntersectionObserverEntry[]) {

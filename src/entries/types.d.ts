@@ -9,6 +9,8 @@ interface ApiResponse<T> {
 }
 
 type SearchParams = {
+  // isPulic확인할 아이디
+  currentUserId?: string;
   // 에셋
   userId?: string[];
   title?: string;

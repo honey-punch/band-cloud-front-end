@@ -15,17 +15,18 @@ export default function NavBar() {
   // refs
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  // context
+  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
+  const { setIsDrawerOpen } = useContext(UploadContext);
+
   // hooks
   const router = useRouter();
   const { logout } = useLogout(() => {
     closeUserMenu();
     handleChangeMe(null);
+    setMe(null);
   });
   const pathname = usePathname();
-
-  // context
-  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
-  const { setIsDrawerOpen } = useContext(UploadContext);
 
   // states
   const [isOpenUserMenu, setIsOpenUserMenu] = useState<boolean>(false);

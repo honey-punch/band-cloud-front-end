@@ -63,6 +63,8 @@ function calculateFileSize(fileSize: number, unit: number): FileSize {
 
 export function parseParamsPage(page: number, searchParams: SearchParams): URLSearchParams {
   const params = {
+    // isPulic확인할 아이디
+    ...(searchParams.currentUserId ? { currentUserId: searchParams.currentUserId } : {}),
     // 에셋
     ...(searchParams.userId ? { userId: searchParams.userId } : {}),
     ...(searchParams.title ? { title: searchParams.title } : {}),
