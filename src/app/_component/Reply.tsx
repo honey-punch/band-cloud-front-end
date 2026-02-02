@@ -8,6 +8,7 @@ import PopupMenu from '@/components/PopupMenu';
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import { toast } from 'react-toastify';
+import { useImage } from '@/hooks/useImage';
 
 interface ReplyProps {
   reply: Reply;
@@ -16,6 +17,9 @@ interface ReplyProps {
 export default function Reply({ reply }: ReplyProps) {
   // refs
   const popupMenuRef = useRef<HTMLDivElement>(null);
+
+  // context
+  const { me } = useContext(MeContext);
 
   // states
   const [replyValue, setReplyValue] = useState<string>(reply.content);
@@ -27,8 +31,11 @@ export default function Reply({ reply }: ReplyProps) {
   const { updateReply } = useUpdateReply(reply.assetId, reply.id);
   const { deleteReply } = useDeleteReply(reply.assetId, reply.id);
 
-  // context
-  const { me, avatarSrc } = useContext(MeContext);
+  const { src, handleImageError } = useImage({
+    defaultSrc: '/default-avatar.png',
+    type: 'avatar',
+    id: me?.id,
+  });
 
   // constants
   const canUpdateOrDeleteReply = !!me && !!user && me.id === user.id;
@@ -66,7 +73,8 @@ export default function Reply({ reply }: ReplyProps) {
   return (
     <div className="flex gap-4 flex-grow relative">
       <img
-        src={reply.userId === me?.id ? avatarSrc : `/file/avatar/${reply.userId}`}
+        src={src}
+        onError={handleImageError}
         alt="avatar"
         className="object-cover w-10 h-10 rounded-full"
       />

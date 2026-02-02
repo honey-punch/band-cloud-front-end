@@ -2,6 +2,7 @@ import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import { ChangeEvent, FormEvent, useContext } from 'react';
 import { MeContext } from '@/app/_component/MeProvider';
+import { useImage } from '@/hooks/useImage';
 
 interface TextFormProps {
   value: string;
@@ -13,12 +14,24 @@ interface TextFormProps {
 
 export default function TextForm({ value, placeholder, onChange, onSubmit, clear }: TextFormProps) {
   // context
-  const { me, setIsOpenLoginModal, avatarSrc } = useContext(MeContext);
+  const { me, setIsOpenLoginModal } = useContext(MeContext);
+
+  // hooks
+  const { src, handleImageError } = useImage({
+    defaultSrc: '/default-avatar.png',
+    type: 'avatar',
+    id: me?.id,
+  });
 
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <label className="group flex gap-4 w-full flex-grow mt-4 relative">
-        <img src={avatarSrc} alt="avatar" className="object-cover w-10 h-10 rounded-full" />
+        <img
+          src={src}
+          onError={handleImageError}
+          alt="avatar"
+          className="object-cover w-10 h-10 rounded-full"
+        />
 
         <input
           type="text"
