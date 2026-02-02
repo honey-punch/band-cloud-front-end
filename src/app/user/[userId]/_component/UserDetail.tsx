@@ -9,6 +9,7 @@ import { FaImage } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import Info from '@/app/user/[userId]/_component/Info';
 import { Tab } from '@/components/Tab';
+import { useImage } from '@/hooks/useImage';
 
 interface UserDetailProps {
   userId: string;
@@ -20,18 +21,19 @@ export default function UserDetail({ userId }: UserDetailProps) {
   // refs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // states
-  const [avatarSrc, setAvatarSrc] = useState<string>(`/file/avatar/${userId}?t=${Date.now()}`);
-
   // context
-  const { me, setIsOpenLoginModal, setAvatarSrc: setMeAvatarSrc } = useContext(MeContext);
+  const { me, setIsOpenLoginModal } = useContext(MeContext);
   const isMe = me?.id === userId;
 
   // hooks
   const { user } = useUserById(userId);
+  const { src, setSrc, isError, handleImageError } = useImage({
+    defaultSrc: '/default-avatar.png',
+    type: 'avatar',
+    id: userId,
+  });
   const { updateUserAvatar } = useUpdateUserAvatar(() => {
-    setAvatarSrc(`/file/avatar/${userId}?t=${Date.now()}`);
-    setMeAvatarSrc(`/file/avatar/${userId}?t=${Date.now()}`);
+    setSrc(`/file/avatar/${userId}?t=${Date.now()}`);
   });
 
   // states
@@ -66,7 +68,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
     <div>
       <div
         style={{
-          backgroundImage: `url(${avatarSrc})`,
+          backgroundImage: `url(${isError ? '/default-avatar.png' : src})`,
           backgroundSize: 'cover',
         }}
         className="w-full h-[250px] object-cover relative bg-no-repeat bg-center"
@@ -76,8 +78,9 @@ export default function UserDetail({ userId }: UserDetailProps) {
         <div className="absolute -bottom-[90px] left-8 flex gap-4 items-center right-0">
           <div onClick={handleClickAvatar} className={`${isMe && 'cursor-pointer group'} relative`}>
             <img
-              src={avatarSrc}
+              src={src}
               alt="avatar"
+              onError={handleImageError}
               className={`w-[180px] h-[180px] object-cover rounded-full`}
             />
             <div className="group-hover:flex justify-center text-6xl items-center hidden w-full h-full absolute top-0 left-0 rounded-full bg-zinc-500 opacity-70">

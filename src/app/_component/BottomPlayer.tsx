@@ -8,6 +8,8 @@ import { useAssetById } from '@/hooks/asset/useAsset';
 import { useUserById } from '@/hooks/user/useUser';
 import Progress from '@/app/_component/Progress';
 import { useStore } from '@/shared/rootStore';
+import { useImage } from '@/hooks/useImage';
+import { ClipLoader } from 'react-spinners';
 
 export default function BottomPlayer() {
   // zustand
@@ -20,12 +22,23 @@ export default function BottomPlayer() {
   const setDuration = useStore((state) => state.setDuration);
   const currentTime = useStore((state) => state.currentTime);
   const setCurrentTime = useStore((state) => state.setCurrentTime);
-  const currentThumbnailSrc = useStore((state) => state.currentThumbnailSrc);
-  const setCurrentThumbnailSrc = useStore((state) => state.setCurrentThumbnailSrc);
 
   // hooks
   const { asset } = useAssetById(currentAssetId || '');
   const { user } = useUserById(asset?.userId || '');
+  const {
+    src,
+    setSrc,
+    isError,
+    isLoading,
+    handleImageError,
+    handleImageLoadStart,
+    handleImageLoad,
+  } = useImage({
+    defaultSrc: '/default-thumbnail.png',
+    type: 'thumbnail',
+    id: currentAssetId || '',
+  });
 
   // states
   const [volume, setVolume] = useState<number>(1);
@@ -36,11 +49,11 @@ export default function BottomPlayer() {
   useEffect(() => {
     if (!audioEl) return;
 
-    setCurrentThumbnailSrc(`/file/thumbnail/${currentAssetId}`);
     audioEl.load();
 
     if (currentAssetId) {
       audioEl.src = `/file/audio/${currentAssetId}`;
+      handleImageLoadStart();
     } else {
       audioEl.src = '';
     }
@@ -165,10 +178,14 @@ export default function BottomPlayer() {
 
       {/* 에셋 정보 */}
       <div className="flex items-center gap-3">
+        {isLoading && <ClipLoader color="ffffff" />}
+
         <img
-          src={currentThumbnailSrc || '/file/thumbnail/null'}
+          src={src}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
           alt="thumbnail"
-          className="w-12 h-12 object-cover"
+          className={`${isLoading && 'hidden'} w-12 h-12 object-cover`}
         />
 
         <div>

@@ -38,23 +38,12 @@ export default function BandDetail({ bandId }: BandDetailProps) {
   // functions
   function handleClickAddMember() {}
 
-  function handleClickJoin() {
-    if (!me) {
-      setIsOpenLoginModal(true);
-      return;
-    }
-
-    toast('Request success');
-  }
-
   return (
     <div>
       <div className="p-8 flex items-center gap-6">
         <div className="font-bold text-4xl">{band?.name}</div>
-        {me?.id === band?.leaderId ? (
+        {me?.id === band?.leaderId && (
           <FilledTextButton text="Add Member" onClick={handleClickAddMember} />
-        ) : (
-          <FilledTextButton text="Join" onClick={handleClickJoin} />
         )}
       </div>
 

@@ -47,14 +47,4 @@ export const createCurrentAssetSlice: SlicePattern<CurrentAssetState, BoundState
       false,
       { type: 'currentAsset/setCurrentTime' },
     ),
-
-  currentThumbnailSrc: null,
-  setCurrentThumbnailSrc: (currentThumbnailSrc) =>
-    set(
-      (state) => {
-        state.currentThumbnailSrc = currentThumbnailSrc;
-      },
-      false,
-      { type: 'currentAsset/setCurrentThumbnailSrc' },
-    ),
 });

@@ -9,6 +9,7 @@ import { MeContext } from '@/app/_component/MeProvider';
 import { useLogout } from '@/hooks/auth/useAuth';
 import PopupMenu from '@/components/PopupMenu';
 import BackDrop from '@/components/BackDrop';
+import { useImage } from '@/hooks/useImage';
 
 export default function NavBar() {
   // refs
@@ -23,12 +24,16 @@ export default function NavBar() {
   const pathname = usePathname();
 
   // context
-  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal, avatarSrc, setAvatarSrc } =
-    useContext(MeContext);
+  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
   const { setIsDrawerOpen } = useContext(UploadContext);
 
   // states
   const [isOpenUserMenu, setIsOpenUserMenu] = useState<boolean>(false);
+  const { src, setSrc, handleImageError } = useImage({
+    defaultSrc: '/default-avatar.png',
+    type: 'avatar',
+    id: me?.id,
+  });
 
   // constants
   const contentArray = [
@@ -62,7 +67,7 @@ export default function NavBar() {
 
   function handleChangeMe(me: User | null) {
     setMe(me);
-    setAvatarSrc(`/file/avatar/${me?.id}?t=${Date.now()}`);
+    setSrc(`/file/avatar/${me?.id}?t=${Date.now()}`);
   }
 
   return (
@@ -103,7 +108,12 @@ export default function NavBar() {
             }}
             className="flex items-center gap-4 hover:opacity-70 active:opacity-60 transition-opacity cursor-pointer"
           >
-            <img src={avatarSrc} alt="avatar" className="object-cover w-10 h-10 rounded-full" />
+            <img
+              src={src}
+              onError={handleImageError}
+              alt="avatar"
+              className="object-cover w-10 h-10 rounded-full"
+            />
             <div className="font-bold text-lg">{me.name}</div>
           </button>
         </div>

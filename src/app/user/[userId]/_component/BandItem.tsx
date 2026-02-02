@@ -5,6 +5,8 @@ import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
 import { useUserSearch } from '@/hooks/user/useUser';
 import { BsThreeDots } from 'react-icons/bs';
+import Textbutton from '@/components/TextButton';
+import FilledTextButton from '@/components/FilledTextButton';
 
 interface BandItemProps {
   id: string;
@@ -32,6 +34,7 @@ export default function BandItem({ id }: BandItemProps) {
 
   // context
   const { me, setIsOpenLoginModal } = useContext(MeContext);
+  const isMember = bandMemberIds.includes(me?.id || '');
 
   // functions
   function handleClickBand() {
@@ -55,20 +58,34 @@ export default function BandItem({ id }: BandItemProps) {
       <div className="font-bold text-xl whitespace-nowrap truncate h-6 grow-0 shrink-0">
         {band?.name}
       </div>
+
       <div className="text-lg h-28 line-clamp-4">{band?.description}</div>
-      <div className="flex relative w-full">
-        {bandMemberIds.map((id, i) => (
-          <img
-            key={`band-member-avatar-${id}`}
-            src={`/file/avatar/${id}`}
-            alt="band-member-avatar"
-            style={{ left: `${i * 24}px`, zIndex: 10 - i }}
-            className="w-10 h-10 rounded-full object-fit absolute"
-          ></img>
-        ))}
-        {totalMemberCount > 5 && (
-          <div className="w-10 h-10 rounded-full absolute left-[120px] flex items-center justify-center border border-zinc-500 bg-zinc-700">
-            <BsThreeDots />
+
+      <div className="flex justify-between">
+        <div className="flex relative w-full">
+          {bandMemberIds.map((id, i) => (
+            <img
+              key={`band-member-avatar-${id}`}
+              src={`/file/avatar/${id}`}
+              alt="band-member-avatar"
+              style={{ left: `${i * 24}px`, zIndex: 10 - i }}
+              className="w-10 h-10 rounded-full object-fit absolute"
+            ></img>
+          ))}
+          {totalMemberCount > 5 && (
+            <div className="w-10 h-10 rounded-full absolute left-[120px] flex items-center justify-center border border-zinc-500 bg-zinc-700">
+              <BsThreeDots />
+            </div>
+          )}
+        </div>
+
+        {!isMember && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <FilledTextButton text="Join" onClick={() => {}} />
           </div>
         )}
       </div>

@@ -7,10 +7,10 @@ import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
 import { FaImage } from 'react-icons/fa';
 import { useUpdateAsset, useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/shared/rootStore';
 import Reply from '@/app/_component/Reply';
 import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
 import TextForm from '@/components/TextForm';
+import { useImage } from '@/hooks/useImage';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -29,9 +29,6 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
   // states
   const [reply, setReply] = useState<string>('');
-  const [thumbnailSrc, setThumbnailSrc] = useState<string>(
-    `/file/thumbnail/${asset.id}?t=${Date.now()}`,
-  );
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
   const [searchReplyParams, setSearchReplyParams] = useState<SearchParams>({
     page: 0,
@@ -40,10 +37,12 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
     limit: 9999,
   });
 
-  // zustand
-  const setCurrentThumbnailSrc = useStore((state) => state.setCurrentThumbnailSrc);
-
   // hooks
+  const { src, setSrc, handleImageError } = useImage({
+    defaultSrc: '/default-thumbnail.png',
+    type: 'thumbnail',
+    id: asset.id || '',
+  });
   const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
   const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
   const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
@@ -53,8 +52,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   const { updateAsset } = useUpdateAsset(asset.id);
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
-    setThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
-    setCurrentThumbnailSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+    setSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
   });
   const router = useRouter();
 
@@ -111,10 +109,11 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
       <div className="flex gap-6">
         <img
-          src={thumbnailSrc}
+          src={src}
           onClick={() => {
             router.push(`/asset/${asset.id}`);
           }}
+          onError={handleImageError}
           alt="thumbnail"
           className="w-36 h-36 object-cover cursor-pointer hover:opacity-70 active:opacity-60 transition-opacity"
         />

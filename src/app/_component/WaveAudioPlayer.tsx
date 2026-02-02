@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useUserById } from '@/hooks/user/useUser';
 import { IoMdPlay, IoMdPause } from 'react-icons/io';
 import { useStore } from '@/shared/rootStore';
-import Progress from '@/app/_component/Progress';
 import { useRouter } from 'next/navigation';
 import { useUpdateAsset } from '@/hooks/asset/useAsset';
+import WaveformCanvas from '@/app/_component/WaveformCanvas';
 
 interface WaveAudioPlayerProps {
   title: string;
@@ -150,10 +150,35 @@ export default function WaveAudioPlayer({
       </div>
 
       <div className="relative w-[500px]">
-        <Progress
+        {/*<Progress*/}
+        {/*  duration={itemDuration}*/}
+        {/*  currentTime={isCurrent ? currentTime : audioRef.current?.currentTime || 0}*/}
+        {/*  handleChangeProgress={handleChangeProgress}*/}
+        {/*/>*/}
+        <WaveformCanvas
+          src={src}
           duration={itemDuration}
-          currentTime={isCurrent ? currentTime : audioRef.current?.currentTime || 0}
-          handleChangeProgress={handleChangeProgress}
+          currentTime={isCurrent ? currentTime : 0}
+          onSeek={(t) => {
+            // 기존 range progress 움직이는 로직이랑 동일하게 처리
+            // 여기서 t는 seconds
+            if (!isCurrent) {
+              setCurrentAssetId(assetId);
+              setCurrentTime(t);
+
+              if (audioEl) {
+                audioEl.onloadedmetadata = () => {
+                  audioEl.currentTime = t;
+                  audioEl.play();
+                };
+              }
+            } else {
+              setCurrentTime(t);
+              if (audioEl) {
+                audioEl.currentTime = t;
+              }
+            }
+          }}
         />
       </div>
     </div>
