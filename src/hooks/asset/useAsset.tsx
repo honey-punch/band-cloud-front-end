@@ -1,4 +1,10 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import {
   createAsset,
   getAssetById,
@@ -23,6 +29,7 @@ export function useInfiniteAssetSearch(searchParams: SearchParams) {
       initialPageParam: 0,
       staleTime: 60 * 1_000,
       gcTime: 120 * 1_000,
+      placeholderData: keepPreviousData,
     });
 
   return {

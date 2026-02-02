@@ -1,5 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { useLogin } from '@/hooks/auth/useAuth';
+import { ClipLoader } from 'react-spinners';
+import { toast } from 'react-toastify';
 
 interface LoginModalProps {
   closeLoginModal(): void;
@@ -17,7 +19,7 @@ interface LoginInputProps {
 
 export default function LoginModal({ closeLoginModal, handleChangeMe }: LoginModalProps) {
   // hooks
-  const { login } = useLogin((user) => {
+  const { login, isLoadingLogin } = useLogin((user) => {
     closeLoginModal();
     handleChangeMe(user);
   });
@@ -37,6 +39,10 @@ export default function LoginModal({ closeLoginModal, handleChangeMe }: LoginMod
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!userId && !password) {
+      toast('Please enter the ID and password.');
+      return;
+    }
     login({ userId, password });
   }
 
@@ -57,9 +63,10 @@ export default function LoginModal({ closeLoginModal, handleChangeMe }: LoginMod
 
       <button
         type="submit"
-        className="bg-orange-500 font-bold text-2xl rounded text-white py-3 cursor-pointer"
+        disabled={isLoadingLogin}
+        className={`${isLoadingLogin ? 'bg-gray-500 text-gray-300' : 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700 transition-colors'} font-bold text-2xl rounded  py-3 cursor-pointer`}
       >
-        Sign in
+        {isLoadingLogin ? <ClipLoader size={24} /> : <span>Sign in</span>}
       </button>
     </form>
   );
