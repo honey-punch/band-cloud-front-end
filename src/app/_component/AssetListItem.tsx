@@ -24,6 +24,9 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   //refs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // zustand
+  const currentAssetId = useStore((state) => state.currentAssetId);
+
   // context
   const { me, setIsOpenLoginModal } = useContext(MeContext);
   const isMe = me?.id === asset.userId;
@@ -55,7 +58,9 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
-    setThumbnailUrl(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+    if (asset.id === currentAssetId) {
+      setThumbnailUrl(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+    }
   });
   const router = useRouter();
 
