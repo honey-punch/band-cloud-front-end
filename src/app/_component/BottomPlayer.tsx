@@ -8,7 +8,6 @@ import { useAssetById } from '@/hooks/asset/useAsset';
 import { useUserById } from '@/hooks/user/useUser';
 import Progress from '@/app/_component/Progress';
 import { useStore } from '@/shared/rootStore';
-import { useImage } from '@/hooks/useImage';
 import { ClipLoader } from 'react-spinners';
 
 export default function BottomPlayer() {
@@ -22,23 +21,14 @@ export default function BottomPlayer() {
   const setDuration = useStore((state) => state.setDuration);
   const currentTime = useStore((state) => state.currentTime);
   const setCurrentTime = useStore((state) => state.setCurrentTime);
+  const thumbnailUrl = useStore((state) => state.thumbnailUrl);
+  const setThumbnailUrl = useStore((state) => state.setThumbnailUrl);
+  const isLoadingThumbnail = useStore((state) => state.isLoadingThumbnail);
+  const setIsLoadingThumbnail = useStore((state) => state.setIsLoadingThumbnail);
 
   // hooks
   const { asset } = useAssetById(currentAssetId || '');
   const { user } = useUserById(asset?.userId || '');
-  const {
-    src,
-    setSrc,
-    isError,
-    isLoading,
-    handleImageError,
-    handleImageLoadStart,
-    handleImageLoad,
-  } = useImage({
-    defaultSrc: '/default-thumbnail.png',
-    type: 'thumbnail',
-    id: currentAssetId || '',
-  });
 
   // states
   const [volume, setVolume] = useState<number>(1);
@@ -53,7 +43,6 @@ export default function BottomPlayer() {
 
     if (currentAssetId) {
       audioEl.src = `/file/audio/${currentAssetId}`;
-      handleImageLoadStart();
     } else {
       audioEl.src = '';
     }
@@ -178,14 +167,18 @@ export default function BottomPlayer() {
 
       {/* 에셋 정보 */}
       <div className="flex items-center gap-3">
-        {isLoading && <ClipLoader color="ffffff" />}
+        {isLoadingThumbnail && <ClipLoader color="ffffff" />}
 
         <img
-          src={src}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
+          src={thumbnailUrl || '/default-thumbnail.png'}
+          onError={() => {
+            setThumbnailUrl(`/default-thumbnail.png`);
+          }}
+          onLoad={() => {
+            setIsLoadingThumbnail(false);
+          }}
           alt="thumbnail"
-          className={`${isLoading && 'hidden'} w-12 h-12 object-cover`}
+          className={`${isLoadingThumbnail && 'hidden'} w-12 h-12 object-cover`}
         />
 
         <div>

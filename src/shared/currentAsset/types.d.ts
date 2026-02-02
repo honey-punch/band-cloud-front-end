@@ -13,4 +13,10 @@ interface CurrentAssetState {
 
   currentTime: number;
   setCurrentTime: (currentTime: number) => void;
+
+  thumbnailUrl: string | null;
+  setThumbnailUrl: (url: string | null) => void;
+
+  isLoadingThumbnail: boolean;
+  setIsLoadingThumbnail: (isLoadingThumbnail: boolean) => void;
 }

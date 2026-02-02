@@ -33,6 +33,8 @@ export default function WaveAudioPlayer({
   const audioEl = useStore((state) => state.audioEl);
   const currentTime = useStore((state) => state.currentTime);
   const setCurrentTime = useStore((state) => state.setCurrentTime);
+  const setThumbnailUrl = useStore((state) => state.setThumbnailUrl);
+  const setIsLoading = useStore((state) => state.setIsLoadingThumbnail);
 
   // constants
   const isCurrent = currentAssetId === assetId;
@@ -82,6 +84,7 @@ export default function WaveAudioPlayer({
     }
 
     setCurrentAssetId(assetId);
+    setThumbnailUrl(`/file/thumbnail/${assetId}?t=${Date.now()}`);
 
     audioEl.onloadedmetadata = () => {
       audioEl.currentTime = 0;
@@ -90,6 +93,8 @@ export default function WaveAudioPlayer({
 
     if (currentAssetId === assetId) {
       audioEl.paused ? audioEl.play() : audioEl.pause();
+    } else {
+      setIsLoading(true);
     }
   }
 

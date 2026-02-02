@@ -47,4 +47,24 @@ export const createCurrentAssetSlice: SlicePattern<CurrentAssetState, BoundState
       false,
       { type: 'currentAsset/setCurrentTime' },
     ),
+
+  thumbnailUrl: null,
+  setThumbnailUrl: (url) =>
+    set(
+      (state) => {
+        state.thumbnailUrl = url;
+      },
+      false,
+      { type: 'currentAsset/setThumbnail' },
+    ),
+
+  isLoadingThumbnail: false,
+  setIsLoadingThumbnail: (isLoadingThumbnail) =>
+    set(
+      (state) => {
+        state.isLoadingThumbnail = isLoadingThumbnail;
+      },
+      false,
+      { type: 'currentAsset/isLoadingThumbnail' },
+    ),
 });

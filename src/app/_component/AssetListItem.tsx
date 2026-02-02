@@ -11,6 +11,7 @@ import Reply from '@/app/_component/Reply';
 import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
 import TextForm from '@/components/TextForm';
 import { useImage } from '@/hooks/useImage';
+import { useStore } from '@/shared/rootStore';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -43,6 +44,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
     type: 'thumbnail',
     id: asset.id || '',
   });
+  const setThumbnailUrl = useStore((state) => state.setThumbnailUrl);
   const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
   const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
   const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
@@ -53,6 +55,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
+    setThumbnailUrl(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
   });
   const router = useRouter();
 
