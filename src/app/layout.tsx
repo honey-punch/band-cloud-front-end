@@ -10,6 +10,7 @@ import { getUserOrFalse } from '@/utils/util';
 import { cookies } from 'next/headers';
 import UploadProvider from '@/app/_component/UploadProvider';
 import MeProvider from '@/app/_component/MeProvider';
+import 'react-tooltip/dist/react-tooltip.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

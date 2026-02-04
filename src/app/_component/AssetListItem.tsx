@@ -12,6 +12,8 @@ import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
 import TextForm from '@/components/TextForm';
 import { useImage } from '@/hooks/useImage';
 import { useStore } from '@/shared/rootStore';
+import { Tooltip } from 'react-tooltip';
+import { ClipLoader } from 'react-spinners';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -54,7 +56,15 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   const { createReply } = useCreateReply(asset.id, () => {
     setReply('');
   });
-  const { updateAsset } = useUpdateAsset(asset.id);
+  const { updateAsset, isLoadingUpdateAsset } = useUpdateAsset(
+    asset.id,
+    () => {
+      toast('Updated successfully');
+    },
+    () => {
+      toast('Failed to update');
+    },
+  );
 
   const { updateAssetThumbnail } = useUpdateAssetThumbnail(() => {
     setSrc(`/file/thumbnail/${asset.id}?t=${Date.now()}`);
@@ -136,12 +146,14 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
 
         <div className="flex gap-2 self-end grow shrink">
           <button
+            data-tooltip-id="my-tooltip"
+            data-tooltip-content="reply"
             onClick={handleClickReply}
-            className={`${isOpenReply ? 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700' : 'hover:bg-zinc-500 active:bg-zinc-600'} cursor-pointer relative text-white  transition-colors rounded-full p-3`}
+            className={`${isOpenReply ? 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700' : 'hover:bg-zinc-500 active:bg-zinc-600'} cursor-pointer relative text-white  transition-colors rounded-full w-10 h-10 flex justify-center items-center`}
           >
             <FaMessage />
             {totalCount > 0 && (
-              <div className="absolute -top-1 -right-1 rounded-full font-semibold bg-red-500 flex items-center justify-center text-xs w-5 h-5">
+              <div className="absolute -top-1 -right-1 rounded-full font-semibold text-black bg-white flex items-center justify-center text-xs w-5 h-5">
                 {totalCount}
               </div>
             )}
@@ -149,8 +161,10 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
           {me?.id === asset.userId && (
             <div className="flex gap-2">
               <button
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content="update thumbnail"
                 onClick={handleClickAddImage}
-                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3"
+                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full w-10 h-10 flex justify-center items-center"
               >
                 <FaImage />
               </button>
@@ -159,9 +173,17 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
                 onClick={() => {
                   updateAsset({ isPublic: !asset.isPublic });
                 }}
-                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full p-3 text-xl"
+                data-tooltip-id="my-tooltip"
+                data-tooltip-content={asset.isPublic ? 'private' : 'public'}
+                className="cursor-pointer text-white hover:bg-zinc-500 active:bg-zinc-600 transition-colors rounded-full w-10 h-10 text-xl flex justify-center items-center"
               >
-                {asset.isPublic ? <GiCardboardBox /> : <GiCardboardBoxClosed />}
+                {isLoadingUpdateAsset ? (
+                  <ClipLoader size={20} color="white" />
+                ) : asset.isPublic ? (
+                  <GiCardboardBox />
+                ) : (
+                  <GiCardboardBoxClosed />
+                )}
               </button>
             </div>
           )}
@@ -197,6 +219,8 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
           </div>
         </div>
       )}
+
+      <Tooltip id="my-tooltip" />
     </div>
   );
 }

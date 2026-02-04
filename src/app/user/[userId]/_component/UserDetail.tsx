@@ -22,7 +22,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  const { me, setIsOpenLoginModal, setAvatarUrl } = useContext(MeContext);
   const isMe = me?.id === userId;
 
   // hooks
@@ -34,6 +34,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
   });
   const { updateUserAvatar } = useUpdateUserAvatar(() => {
     setSrc(`/file/avatar/${userId}?t=${Date.now()}`);
+    setAvatarUrl(`/file/avatar/${userId}?t=${Date.now()}`);
   });
 
   // states

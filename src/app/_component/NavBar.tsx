@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import LoginModal from '@/app/_component/LoginModal';
 import { usePathname, useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa6';
@@ -9,14 +9,23 @@ import { MeContext } from '@/app/_component/MeProvider';
 import { useLogout } from '@/hooks/auth/useAuth';
 import PopupMenu from '@/components/PopupMenu';
 import BackDrop from '@/components/BackDrop';
-import { useImage } from '@/hooks/useImage';
+import { ClipLoader } from 'react-spinners';
 
 export default function NavBar() {
   // refs
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // context
-  const { me, setMe, isOpenLoginModal, setIsOpenLoginModal } = useContext(MeContext);
+  const {
+    me,
+    setMe,
+    isOpenLoginModal,
+    setIsOpenLoginModal,
+    avatarUrl,
+    setAvatarUrl,
+    isAvatarLoading,
+    setIsAvatarLoading,
+  } = useContext(MeContext);
   const { setIsDrawerOpen } = useContext(UploadContext);
 
   // hooks
@@ -30,11 +39,6 @@ export default function NavBar() {
 
   // states
   const [isOpenUserMenu, setIsOpenUserMenu] = useState<boolean>(false);
-  const { src, setSrc, handleImageError } = useImage({
-    defaultSrc: '/default-avatar.png',
-    type: 'avatar',
-    id: me?.id,
-  });
 
   // constants
   const contentArray = [
@@ -68,7 +72,8 @@ export default function NavBar() {
 
   function handleChangeMe(me: User | null) {
     setMe(me);
-    setSrc(`/file/avatar/${me?.id}?t=${Date.now()}`);
+    setIsAvatarLoading(true);
+    setAvatarUrl(`/file/avatar/${me?.id}?t=${Date.now()}`);
   }
 
   return (
@@ -109,13 +114,21 @@ export default function NavBar() {
             }}
             className="flex items-center gap-4 hover:opacity-70 active:opacity-60 transition-opacity cursor-pointer"
           >
+            {isAvatarLoading && <ClipLoader color="ffffff" />}
             <img
-              src={src}
-              onError={handleImageError}
+              src={avatarUrl || '/default-avatar.png'}
+              onError={() => {
+                setAvatarUrl('/default-avatar.png');
+              }}
+              onLoad={() => {
+                setIsAvatarLoading(false);
+              }}
               alt="avatar"
-              className="object-cover w-10 h-10 rounded-full"
+              className={`${isAvatarLoading && 'hidden'} "object-cover w-10 h-10 rounded-full"`}
             />
-            <div className="font-bold text-lg">{me.name}</div>
+            <div className="font-bold text-lg">
+              {me.name}({me.userId})
+            </div>
           </button>
         </div>
       ) : (
