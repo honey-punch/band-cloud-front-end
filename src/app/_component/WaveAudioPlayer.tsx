@@ -25,6 +25,7 @@ export default function WaveAudioPlayer({
 }: WaveAudioPlayerProps) {
   // useRef
   const audioRef = useRef<HTMLAudioElement>(null);
+  const isFirstRender = useRef(true);
 
   // zustand
   const currentAssetId = useStore((state) => state.currentAssetId);
@@ -68,14 +69,17 @@ export default function WaveAudioPlayer({
   }, [audioRef.current]);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const timer = setTimeout(() => {
       updateAsset({ title: titleValue });
     }, 500);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [titleValue]);
+    return () => clearTimeout(timer);
+  }, [titleValue, updateAsset]);
 
   // functions
   function onPlayPause() {

@@ -24,7 +24,6 @@ export default function UserDetail({ userId }: UserDetailProps) {
   // zustand
   const me = useStore((state) => state.me);
   const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
-  const avatarUrl = useStore((state) => state.avatarUrl);
   const setAvatarUrl = useStore((state) => state.setAvatarUrl);
   const isMe = me?.id === userId;
 
