@@ -1,5 +1,5 @@
 import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
-import { useState, useRef, FormEvent, ChangeEvent } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { FaMessage } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 import { FaImage } from 'react-icons/fa';

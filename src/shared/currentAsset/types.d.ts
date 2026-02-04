@@ -19,4 +19,8 @@ interface CurrentAssetState {
 
   isLoadingThumbnail: boolean;
   setIsLoadingThumbnail: (isLoadingThumbnail: boolean) => void;
+
+  playAsset: (assetId: string, startTime: number = 0) => Promise<void>;
+  togglePlayPause: (assetId: string) => Promise<void>;
+  seekTo: (assetId: string, time: number) => void;
 }

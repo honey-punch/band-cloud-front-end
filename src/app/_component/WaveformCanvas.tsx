@@ -2,89 +2,64 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-type Props = {
+interface Props {
   src: string;
-  duration: number; // seconds
-  currentTime: number; // seconds
+  currentTime: number;
+  onSeek: (time: number) => void;
+
+  // optional
+  bars?: number;
   height?: number;
   className?: string;
-
-  // 클릭/드래그로 seek 지원
-  onSeek?: (time: number) => void;
-
-  // 성능: 바 개수
-  bars?: number;
-};
+}
 
 export default function WaveformCanvas({
   src,
-  duration,
   currentTime,
+  onSeek,
+  bars = 100,
   height = 44,
   className = '',
-  onSeek,
-  bars = 140,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [peaks, setPeaks] = useState<number[] | null>(null);
+  const [duration, setDuration] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 드래그 상태
-  const [isScrubbing, setIsScrubbing] = useState(false);
-  const [scrubRatio, setScrubRatio] = useState<number | null>(null);
+  // =========================
+  // ✅ 상태는 ref로만 관리 (렌더링 최소화)
+  // =========================
+  const isHoverRef = useRef(false);
+  const isScrubbingRef = useRef(false);
+  const scrubRatioRef = useRef<number | null>(null);
 
-  // ✅ hover 상태
-  const [isHover, setIsHover] = useState(false);
+  // hoverIntensity는 0~1로 부드럽게 이동 (애니메이션 값)
+  const hoverIntensityRef = useRef(0);
 
-  // ✅ hover 애니메이션 강도(0~1)
-  const [hoverIntensity, setHoverIntensity] = useState(0);
-  const hoverRafRef = useRef<number | null>(null);
+  // RAF 관리
+  const rafDrawRef = useRef<number | null>(null);
+  const rafHoverRef = useRef<number | null>(null);
 
-  // hoverIntensity 부드럽게 변화시키기 (트랜지션 느낌)
-  useEffect(() => {
-    if (hoverRafRef.current) cancelAnimationFrame(hoverRafRef.current);
-
-    const target = isHover ? 1 : 0;
-    const speed = 0.12; // 값 클수록 빨라짐
-
-    const tick = () => {
-      setHoverIntensity((prev) => {
-        const next = prev + (target - prev) * speed;
-
-        // 거의 도달하면 고정
-        if (Math.abs(next - target) < 0.01) return target;
-
-        hoverRafRef.current = requestAnimationFrame(tick);
-        return next;
-      });
-    };
-
-    hoverRafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      if (hoverRafRef.current) cancelAnimationFrame(hoverRafRef.current);
-    };
-  }, [isHover]);
-
-  // 실제 재생 progress
+  // =========================
+  // 재생 progress (state로 계산)
+  // =========================
   const playProgress = useMemo(() => {
     if (!duration || duration <= 0) return 0;
     return Math.min(1, Math.max(0, currentTime / duration));
   }, [currentTime, duration]);
 
-  // 드래그 중이면 드래그 progress로 색칠, 아니면 재생 progress
-  const drawProgress = useMemo(() => {
-    if (isScrubbing && scrubRatio !== null) return scrubRatio;
-    return playProgress;
-  }, [isScrubbing, scrubRatio, playProgress]);
-
+  // =========================
+  // peaks + duration build
+  // =========================
   useEffect(() => {
     let cancelled = false;
 
     async function buildPeaks() {
       try {
         setIsLoading(true);
+        setPeaks(null);
+        setDuration(0);
 
         const res = await fetch(src);
         const arrayBuffer = await res.arrayBuffer();
@@ -92,12 +67,19 @@ export default function WaveformCanvas({
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
+        if (cancelled) {
+          await audioCtx.close();
+          return;
+        }
+
+        setDuration(audioBuffer.duration);
+
         const channelData0 = audioBuffer.getChannelData(0);
         const channelData1 =
           audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null;
 
         const totalSamples = channelData0.length;
-        const blockSize = Math.floor(totalSamples / bars);
+        const blockSize = Math.max(1, Math.floor(totalSamples / bars));
 
         const newPeaks: number[] = new Array(bars).fill(0);
 
@@ -124,7 +106,10 @@ export default function WaveformCanvas({
         await audioCtx.close();
       } catch (e) {
         console.error('Waveform build error:', e);
-        if (!cancelled) setPeaks(null);
+        if (!cancelled) {
+          setPeaks(null);
+          setDuration(0);
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -137,8 +122,46 @@ export default function WaveformCanvas({
     };
   }, [src, bars]);
 
-  // draw waveform
   useEffect(() => {
+    // ✅ 다른 오디오로 바뀌면 무조건 진행상황 0으로 초기화
+    isScrubbingRef.current = false;
+    scrubRatioRef.current = null;
+
+    // hover도 같이 끄고 싶으면 (선택)
+    isHoverRef.current = false;
+    hoverIntensityRef.current = 0;
+
+    // 바로 그려서 UI 즉시 0으로
+    requestDraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
+  // =========================
+  // 유틸
+  // =========================
+  function getRatioFromPointerEvent(e: React.PointerEvent<HTMLCanvasElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    return Math.min(1, Math.max(0, x / rect.width));
+  }
+
+  function ratioToTime(ratio: number) {
+    if (!duration || duration <= 0) return 0;
+    return ratio * duration;
+  }
+
+  // =========================
+  // draw (한 프레임에 한번만)
+  // =========================
+  const requestDraw = () => {
+    if (rafDrawRef.current) return;
+    rafDrawRef.current = requestAnimationFrame(() => {
+      rafDrawRef.current = null;
+      draw();
+    });
+  };
+
+  const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -146,17 +169,20 @@ export default function WaveformCanvas({
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-
     const cssWidth = canvas.clientWidth;
     const cssHeight = height;
 
-    canvas.width = Math.floor(cssWidth * dpr);
-    canvas.height = Math.floor(cssHeight * dpr);
+    // 캔버스 사이즈 세팅
+    const nextW = Math.floor(cssWidth * dpr);
+    const nextH = Math.floor(cssHeight * dpr);
+
+    if (canvas.width !== nextW) canvas.width = nextW;
+    if (canvas.height !== nextH) canvas.height = nextH;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
+    // peaks 없을 때 placeholder
     if (!peaks || peaks.length === 0) {
       ctx.globalAlpha = 0.25;
       ctx.fillStyle = '#ffffff';
@@ -176,17 +202,19 @@ export default function WaveformCanvas({
     const centerY = cssHeight / 2;
     const maxBarHeight = cssHeight * 0.9;
 
-    // 기본/활성 색
     const baseColor = 'rgba(255,255,255,0.35)';
     const activeColor = 'rgba(255,105,0,0.95)';
-
-    // 드래그 중엔 살짝 더 밝게
     const scrubbingColor = 'rgba(255,255,255,1)';
 
-    // ✅ hover 시 밝게 만들기 위한 컬러(화이트)
-    // hoverIntensity(0~1)에 따라 baseColor/activeColor 위에 흰색을 덮는 느낌으로
-    const hoverWhiteAlphaBase = 0.45 * hoverIntensity; // 비활성 바 밝아지는 정도
-    const hoverWhiteAlphaActive = 0.25 * hoverIntensity; // 활성 바도 살짝 하얘지는 정도
+    const isScrubbing = isScrubbingRef.current;
+    const scrubRatio = scrubRatioRef.current;
+
+    const drawProgress = isScrubbing && scrubRatio !== null ? scrubRatio : playProgress;
+
+    const hoverIntensity = hoverIntensityRef.current;
+
+    const hoverWhiteAlphaBase = 0.9 * hoverIntensity;
+    const hoverWhiteAlphaActive = 0.5 * hoverIntensity;
 
     for (let i = 0; i < peaks.length; i++) {
       const x = i * barWidth;
@@ -196,7 +224,6 @@ export default function WaveformCanvas({
       const ratio = i / peaks.length;
       const isActive = ratio <= drawProgress;
 
-      // 기본 색
       if (isActive) {
         ctx.fillStyle = isScrubbing ? scrubbingColor : activeColor;
       } else {
@@ -207,7 +234,7 @@ export default function WaveformCanvas({
       roundRect(ctx, x, y, usableBarWidth, h, radius);
       ctx.fill();
 
-      // ✅ hover 오버레이(흰색으로 부드럽게 밝아짐)
+      // hover overlay
       if (!isScrubbing && hoverIntensity > 0.001) {
         ctx.globalAlpha = isActive ? hoverWhiteAlphaActive : hoverWhiteAlphaBase;
         ctx.fillStyle = '#ffffff';
@@ -217,7 +244,7 @@ export default function WaveformCanvas({
       }
     }
 
-    // 드래그 중이면 현재 커서 위치에 얇은 라인 하나 추가 (감성 + 가독성)
+    // scrubbing line
     if (isScrubbing && scrubRatio !== null) {
       const x = scrubRatio * cssWidth;
       ctx.globalAlpha = 0.7;
@@ -225,66 +252,137 @@ export default function WaveformCanvas({
       ctx.fillRect(x, 0, 1, cssHeight);
       ctx.globalAlpha = 1;
     }
-  }, [peaks, drawProgress, isScrubbing, scrubRatio, height, hoverIntensity]);
+  };
 
-  function getRatioFromEvent(e: React.MouseEvent<HTMLCanvasElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const ratio = Math.min(1, Math.max(0, x / rect.width));
-    return ratio;
-  }
+  // =========================
+  // hover 애니메이션 (state setX ❌)
+  // =========================
+  const startHoverAnimation = () => {
+    if (rafHoverRef.current) cancelAnimationFrame(rafHoverRef.current);
 
-  function ratioToTime(ratio: number) {
-    if (!duration || duration <= 0) return 0;
-    return ratio * duration;
-  }
+    const target = isHoverRef.current ? 1 : 0;
+    const speed = 0.16; // 0.12~0.2 정도가 250~350ms 느낌
 
-  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!onSeek) return;
-    if (!duration || duration <= 0) return;
+    const tick = () => {
+      const prev = hoverIntensityRef.current;
+      const next = prev + (target - prev) * speed;
 
-    const ratio = getRatioFromEvent(e);
-    setIsScrubbing(true);
-    setScrubRatio(ratio);
-  }
+      hoverIntensityRef.current = next;
 
-  function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!isScrubbing) return;
-    const ratio = getRatioFromEvent(e);
-    setScrubRatio(ratio);
-  }
+      requestDraw();
 
-  function handleMouseUp() {
-    if (!onSeek) return;
-    if (!duration || duration <= 0) return;
+      if (Math.abs(next - target) < 0.01) {
+        hoverIntensityRef.current = target;
+        requestDraw();
+        return;
+      }
 
-    if (scrubRatio !== null) {
-      onSeek(ratioToTime(scrubRatio));
-    }
+      rafHoverRef.current = requestAnimationFrame(tick);
+    };
 
-    setIsScrubbing(false);
-    setScrubRatio(null);
-  }
+    rafHoverRef.current = requestAnimationFrame(tick);
+  };
 
-  function handleMouseLeave() {
-    // leave 시엔 미리보기만 종료 (seek은 안 함)
-    setIsScrubbing(false);
-    setScrubRatio(null);
-    setIsHover(false);
-  }
+  // =========================
+  // peaks/currentTime 변경시 다시 draw
+  // =========================
+  useEffect(() => {
+    requestDraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peaks, playProgress, height]);
 
+  // =========================
+  // unmount cleanup
+  // =========================
+  useEffect(() => {
+    return () => {
+      if (rafDrawRef.current) cancelAnimationFrame(rafDrawRef.current);
+      if (rafHoverRef.current) cancelAnimationFrame(rafHoverRef.current);
+    };
+  }, []);
+
+  // =========================
+  // JSX
+  // =========================
   return (
     <div className={`w-full ${className}`}>
       <canvas
         ref={canvasRef}
         style={{ height }}
         className="w-full cursor-pointer select-none"
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={handleMouseLeave}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+        onPointerEnter={() => {
+          isHoverRef.current = true;
+          startHoverAnimation();
+        }}
+        onPointerLeave={(e) => {
+          // hover는 반드시 종료
+          isHoverRef.current = false;
+          startHoverAnimation();
+
+          // 스크러빙도 같이 종료
+          isScrubbingRef.current = false;
+          scrubRatioRef.current = null;
+
+          // 혹시 캡처중이면 해제
+          try {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          } catch {}
+
+          requestDraw();
+        }}
+        onPointerDown={(e) => {
+          if (!duration || duration <= 0) return;
+
+          e.currentTarget.setPointerCapture(e.pointerId);
+
+          isScrubbingRef.current = true;
+          scrubRatioRef.current = getRatioFromPointerEvent(e);
+
+          requestDraw();
+        }}
+        onPointerMove={(e) => {
+          if (!isScrubbingRef.current) return;
+
+          scrubRatioRef.current = getRatioFromPointerEvent(e);
+          requestDraw();
+        }}
+        onPointerUp={(e) => {
+          if (!duration || duration <= 0) return;
+
+          const ratio = scrubRatioRef.current;
+          if (ratio !== null) {
+            onSeek(ratioToTime(ratio));
+          }
+
+          isScrubbingRef.current = false;
+          scrubRatioRef.current = null;
+
+          try {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          } catch {}
+
+          requestDraw();
+        }}
+        onPointerCancel={() => {
+          isScrubbingRef.current = false;
+          scrubRatioRef.current = null;
+
+          isHoverRef.current = false;
+          startHoverAnimation();
+
+          requestDraw();
+        }}
+        onLostPointerCapture={() => {
+          isScrubbingRef.current = false;
+          scrubRatioRef.current = null;
+
+          isHoverRef.current = false;
+          startHoverAnimation();
+
+          requestDraw();
+        }}
       />
+
       {isLoading && <div className="text-xs text-zinc-400 mt-1">waveform loading...</div>}
     </div>
   );

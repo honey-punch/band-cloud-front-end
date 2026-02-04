@@ -126,21 +126,12 @@ export default function BottomPlayer() {
       <audio
         ref={(el) => setAudioEl(el)}
         controls
-        onPlay={() => {
-          setIsPlaying(true);
-        }}
-        onPause={() => {
-          setIsPlaying(false);
-        }}
-        onTimeUpdate={(e) => {
-          setCurrentTime(e.currentTarget.currentTime);
-        }}
-        onDurationChange={(e) => {
-          setDuration(e.currentTarget.duration);
-        }}
-        src={currentAssetId || `/file/audio/${currentAssetId}`}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onDurationChange={(e) => setDuration(e.currentTarget.duration)}
         className="hidden"
-      ></audio>
+      />
 
       {/* 볼륨 */}
       <div className="relative group z-20">
