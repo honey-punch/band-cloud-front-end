@@ -1,14 +1,13 @@
 'use client';
 
 import { useBandById } from '@/hooks/band/useBand';
-import { useContext, useState } from 'react';
-import { MeContext } from '@/app/_component/MeProvider';
+import { useState } from 'react';
 import FilledTextButton from '@/components/FilledTextButton';
-import { toast } from 'react-toastify';
 import { Tab } from '@/components/Tab';
 import BandAudio from '@/app/band/[bandId]/_component/BandAudio';
 import { useUserSearch } from '@/hooks/user/useUser';
 import BandBoard from '@/app/band/[bandId]/_component/BandBoard';
+import { useStore } from '@/shared/rootStore';
 
 interface BandDetailProps {
   bandId: string;
@@ -17,8 +16,9 @@ interface BandDetailProps {
 type TabMenu = 'audio' | 'board' | 'user';
 
 export default function BandDetail({ bandId }: BandDetailProps) {
-  // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
 
   // states
   const [tabMenu, setTabMenu] = useState<TabMenu>('audio');

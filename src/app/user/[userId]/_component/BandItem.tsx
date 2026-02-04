@@ -1,12 +1,10 @@
 import { useBandById } from '@/hooks/band/useBand';
 import { useRouter } from 'next/navigation';
-import { useContext } from 'react';
-import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
 import { useUserSearch } from '@/hooks/user/useUser';
 import { BsThreeDots } from 'react-icons/bs';
-import Textbutton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
+import { useStore } from '@/shared/rootStore';
 
 interface BandItemProps {
   id: string;
@@ -33,7 +31,9 @@ export default function BandItem({ id }: BandItemProps) {
   const router = useRouter();
 
   // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
+
   const isMember = bandMemberIds.includes(me?.id || '');
 
   // functions

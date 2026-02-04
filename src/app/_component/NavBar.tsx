@@ -5,30 +5,29 @@ import LoginModal from '@/app/_component/LoginModal';
 import { usePathname, useRouter } from 'next/navigation';
 import { FaPlus } from 'react-icons/fa6';
 import { UploadContext } from '@/app/_component/UploadProvider';
-import { MeContext } from '@/app/_component/MeProvider';
 import { useLogout } from '@/hooks/auth/useAuth';
 import PopupMenu from '@/components/PopupMenu';
 import BackDrop from '@/components/BackDrop';
 import { ClipLoader } from 'react-spinners';
+import { useStore } from '@/shared/rootStore';
 
 export default function NavBar() {
   // refs
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // context
-  const {
-    me,
-    setMe,
-    isOpenLoginModal,
-    setIsOpenLoginModal,
-    avatarUrl,
-    setAvatarUrl,
-    isAvatarLoading,
-    setIsAvatarLoading,
-  } = useContext(MeContext);
   const { setIsDrawerOpen } = useContext(UploadContext);
 
   // hooks
+  const me = useStore((state) => state.me);
+  const setMe = useStore((state) => state.setMe);
+  const isOpenLoginModal = useStore((state) => state.isOpenLoginModal);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
+  const avatarUrl = useStore((state) => state.avatarUrl);
+  const setAvatarUrl = useStore((state) => state.setAvatarUrl);
+  const isAvatarLoading = useStore((state) => state.isAvatarLoading);
+  const setIsAvatarLoading = useStore((state) => state.setIsAvatarLoading);
+
   const router = useRouter();
   const { logout } = useLogout(() => {
     closeUserMenu();
@@ -124,7 +123,7 @@ export default function NavBar() {
                 setIsAvatarLoading(false);
               }}
               alt="avatar"
-              className={`${isAvatarLoading && 'hidden'} "object-cover w-10 h-10 rounded-full"`}
+              className={`${isAvatarLoading && 'hidden'} object-cover w-10 h-10 rounded-full`}
             />
             <div className="font-bold text-lg">
               {me.name}({me.userId})

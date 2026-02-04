@@ -2,15 +2,12 @@
 
 import { useInfiniteAssetSearch } from '@/hooks/asset/useAsset';
 import AssetListItem from '@/app/_component/AssetListItem';
-import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import SearchInput from '@/components/SearchInput';
-import { MeContext } from '@/app/_component/MeProvider';
+import { useStore } from '@/shared/rootStore';
 
 export default function Main() {
-  // context
-  const { me } = useContext(MeContext);
-
   // states
   const [searchAssetParams, setSearchAssetParams] = useState<SearchParams>({
     currentUserId: '',
@@ -24,6 +21,7 @@ export default function Main() {
   const [title, setTitle] = useState<string>('');
 
   // hooks
+  const me = useStore((state) => state.me);
   const {
     assetList,
     isLoadingAssetList,

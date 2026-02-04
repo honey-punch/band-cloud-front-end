@@ -1,9 +1,9 @@
-import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import TextInput from '@/components/TextInput';
-import { MeContext } from '@/app/_component/MeProvider';
 import { useCreateBand } from '@/hooks/band/useBand';
 import { toast } from 'react-toastify';
 import { useUpdateUser } from '@/hooks/user/useUser';
+import { useStore } from '@/shared/rootStore';
 
 interface CreateBandModalProps {
   closeCreateBandModal: () => void;
@@ -15,8 +15,8 @@ type CreateBandValues = {
 };
 
 export default function CreateBandModal({ closeCreateBandModal }: CreateBandModalProps) {
-  // context
-  const { me } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
 
   // states
   const [createBandValues, setCreateBandValues] = useState<CreateBandValues>({

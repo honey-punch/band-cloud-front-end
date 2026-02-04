@@ -1,7 +1,7 @@
-import { ChangeEvent, useContext, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useUpdateUser } from '@/hooks/user/useUser';
-import { MeContext } from '@/app/_component/MeProvider';
 import TextInput from '@/components/TextInput';
+import { useStore } from '@/shared/rootStore';
 
 interface InfoProps {
   user?: User;
@@ -15,8 +15,9 @@ type Info = {
 };
 
 export default function Info({ user, userId }: InfoProps) {
-  // context
-  const { setMe, me } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
+  const setMe = useStore((state) => state.setMe);
 
   // constants
   const isMe = me?.id === userId;

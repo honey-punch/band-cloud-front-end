@@ -1,14 +1,14 @@
 'use client';
 
 import { useUpdateUserAvatar, useUserById } from '@/hooks/user/useUser';
-import { ChangeEvent, useContext, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import Audio from './Audio';
 import Band from './Band';
-import { MeContext } from '@/app/_component/MeProvider';
 import { FaImage } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import Info from '@/app/user/[userId]/_component/Info';
 import { Tab } from '@/components/Tab';
+import { useStore } from '@/shared/rootStore';
 import { useImage } from '@/hooks/useImage';
 
 interface UserDetailProps {
@@ -21,20 +21,25 @@ export default function UserDetail({ userId }: UserDetailProps) {
   // refs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // context
-  const { me, setIsOpenLoginModal, setAvatarUrl } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
+  const avatarUrl = useStore((state) => state.avatarUrl);
+  const setAvatarUrl = useStore((state) => state.setAvatarUrl);
   const isMe = me?.id === userId;
 
   // hooks
   const { user } = useUserById(userId);
-  const { src, setSrc, isError, handleImageError } = useImage({
+
+  const { src, setSrc, handleImageError } = useImage({
     defaultSrc: '/default-avatar.png',
     type: 'avatar',
     id: userId,
   });
+
   const { updateUserAvatar } = useUpdateUserAvatar(() => {
-    setSrc(`/file/avatar/${userId}?t=${Date.now()}`);
     setAvatarUrl(`/file/avatar/${userId}?t=${Date.now()}`);
+    setSrc(`/file/avatar/${userId}?t=${Date.now()}`);
   });
 
   // states
@@ -69,7 +74,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
     <div>
       <div
         style={{
-          backgroundImage: `url(${isError ? '/default-avatar.png' : src})`,
+          backgroundImage: `url(${src})`,
           backgroundSize: 'cover',
         }}
         className="w-full h-[250px] object-cover relative bg-no-repeat bg-center"
@@ -79,7 +84,7 @@ export default function UserDetail({ userId }: UserDetailProps) {
         <div className="absolute -bottom-[90px] left-8 flex gap-4 items-center right-0">
           <div onClick={handleClickAvatar} className={`${isMe && 'cursor-pointer group'} relative`}>
             <img
-              src={src}
+              src={src || '/default-avatar.png'}
               alt="avatar"
               onError={handleImageError}
               className={`w-[180px] h-[180px] object-cover rounded-full`}

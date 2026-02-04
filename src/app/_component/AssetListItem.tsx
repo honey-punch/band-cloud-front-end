@@ -1,7 +1,6 @@
 import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
-import { useContext, useState, useRef, FormEvent, ChangeEvent } from 'react';
+import { useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { FaMessage } from 'react-icons/fa6';
-import { MeContext } from '@/app/_component/MeProvider';
 import { toast } from 'react-toastify';
 import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
 import { FaImage } from 'react-icons/fa';
@@ -29,10 +28,6 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   // zustand
   const currentAssetId = useStore((state) => state.currentAssetId);
 
-  // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
-  const isMe = me?.id === asset.userId;
-
   // states
   const [reply, setReply] = useState<string>('');
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
@@ -44,12 +39,19 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   });
 
   // hooks
+  // asset
+  const setThumbnailUrl = useStore((state) => state.setThumbnailUrl);
+  // user
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
+  const me = useStore((state) => state.me);
+  const isMe = me?.id === asset.userId;
+
   const { src, setSrc, handleImageError } = useImage({
     defaultSrc: '/default-thumbnail.png',
     type: 'thumbnail',
     id: asset.id || '',
   });
-  const setThumbnailUrl = useStore((state) => state.setThumbnailUrl);
+
   const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
   const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
   const totalCount = replyList?.pages[0].page?.totalCount ?? 0;

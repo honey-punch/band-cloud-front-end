@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, ReactNode, useRef, createContext, useContext, useEffect } from 'react';
+import { useState, ReactNode, useRef, createContext, useEffect } from 'react';
 import { createAsset, upload } from '@/entries/asset/api';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
-import { MeContext } from '@/app/_component/MeProvider';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
-import { usePersistStore } from '@/shared/rootStore';
+import { usePersistStore, useStore } from '@/shared/rootStore';
 import { convertFileSizeWithoutZero } from '@/utils/util';
 import { usePathname } from 'next/navigation';
 
@@ -30,9 +29,6 @@ export default function UploadProvider({ children }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const drawRef = useRef<HTMLDivElement>(null);
 
-  // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
-
   // states
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
@@ -46,6 +42,9 @@ export default function UploadProvider({ children }: Props) {
   const pathname = usePathname();
   const isBand = pathname.startsWith('/band/');
   const bandId = pathname.split('/')[2];
+
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
 
   // effects
   useEffect(() => {

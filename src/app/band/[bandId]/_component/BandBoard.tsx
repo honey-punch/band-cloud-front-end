@@ -1,9 +1,9 @@
 import TextForm from '@/components/TextForm';
-import { FormEvent, useContext, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
-import { MeContext } from '@/app/_component/MeProvider';
 import { useCreateNote, useNoteByBandId } from '@/hooks/note/useNote';
 import Note from '@/app/band/[bandId]/_component/Note';
+import { useStore } from '@/shared/rootStore';
 
 interface BandBoardProps {
   bandId: string;
@@ -19,8 +19,8 @@ export default function BandBoard({ bandId }: BandBoardProps) {
   });
   const [note, setNote] = useState<string>('');
 
-  // context
-  const { me } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
 
   // hooks
   const { noteList, hasNextPage, fetchNextPage } = useNoteByBandId(bandId, searchNoteParams);

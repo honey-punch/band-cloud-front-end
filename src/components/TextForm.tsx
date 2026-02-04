@@ -1,8 +1,8 @@
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
-import { ChangeEvent, FormEvent, useContext } from 'react';
-import { MeContext } from '@/app/_component/MeProvider';
+import { ChangeEvent, FormEvent } from 'react';
 import { useImage } from '@/hooks/useImage';
+import { useStore } from '@/shared/rootStore';
 
 interface TextFormProps {
   value: string;
@@ -13,10 +13,10 @@ interface TextFormProps {
 }
 
 export default function TextForm({ value, placeholder, onChange, onSubmit, clear }: TextFormProps) {
-  // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
-
   // hooks
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
+
   const { src, handleImageError } = useImage({
     defaultSrc: '/default-avatar.png',
     type: 'avatar',

@@ -1,13 +1,13 @@
-import { useContext, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useUserById } from '@/hooks/user/useUser';
 import TimeAgo from 'timeago-react';
-import { MeContext } from '@/app/_component/MeProvider';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import PopupMenu from '@/components/PopupMenu';
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import { toast } from 'react-toastify';
 import { useDeleteNote, useUpdateNote } from '@/hooks/note/useNote';
+import { useStore } from '@/shared/rootStore';
 
 interface NoteProps {
   note: Note;
@@ -27,8 +27,9 @@ export default function Note({ note }: NoteProps) {
   const { updateNote } = useUpdateNote(note.bandId, note.id);
   const { deleteNote } = useDeleteNote(note.bandId, note.id);
 
-  // context
-  const { me, avatarSrc } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
+  const avatarUrl = useStore((state) => state.avatarUrl);
 
   // constants
   const canUpdateOrDeleteReply = !!me && !!user && me.id === user.id;
@@ -66,7 +67,11 @@ export default function Note({ note }: NoteProps) {
   return (
     <div className="flex gap-4 flex-grow relative">
       <img
-        src={note.userId === me?.id ? avatarSrc : `/file/avatar/${note.userId}`}
+        src={
+          note.userId === me?.id
+            ? avatarUrl || '/default-avatar.png'
+            : `/file/avatar/${note.userId}`
+        }
         alt="avatar"
         className="object-cover w-10 h-10 rounded-full"
       />

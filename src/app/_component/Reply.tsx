@@ -2,13 +2,13 @@ import { useContext, useRef, useState } from 'react';
 import { useUserById } from '@/hooks/user/useUser';
 import TimeAgo from 'timeago-react';
 import { useDeleteReply, useUpdateReply } from '@/hooks/reply/useReply';
-import { MeContext } from '@/app/_component/MeProvider';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import PopupMenu from '@/components/PopupMenu';
 import TextButton from '@/components/TextButton';
 import FilledTextButton from '@/components/FilledTextButton';
 import { toast } from 'react-toastify';
 import { useImage } from '@/hooks/useImage';
+import { useStore } from '@/shared/rootStore';
 
 interface ReplyProps {
   reply: Reply;
@@ -18,15 +18,14 @@ export default function Reply({ reply }: ReplyProps) {
   // refs
   const popupMenuRef = useRef<HTMLDivElement>(null);
 
-  // context
-  const { me } = useContext(MeContext);
-
   // states
   const [replyValue, setReplyValue] = useState<string>(reply.content);
   const [isOpenReplyMenu, setIsOpenReplyMenu] = useState<boolean>(false);
   const [isUpdateReply, setIsUpdateReply] = useState<boolean>(false);
 
   // hooks
+  const me = useStore((state) => state.me);
+
   const { user } = useUserById(reply.userId);
   const { updateReply } = useUpdateReply(reply.assetId, reply.id);
   const { deleteReply } = useDeleteReply(reply.assetId, reply.id);

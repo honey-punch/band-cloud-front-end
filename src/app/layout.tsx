@@ -9,8 +9,8 @@ import api from '@/entries';
 import { getUserOrFalse } from '@/utils/util';
 import { cookies } from 'next/headers';
 import UploadProvider from '@/app/_component/UploadProvider';
-import MeProvider from '@/app/_component/MeProvider';
 import 'react-tooltip/dist/react-tooltip.css';
+import InitMe from '@/app/_component/InitMe';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,16 +49,15 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white h-screen`}
       >
+        <InitMe initMe={initMe} />
         <RQProvider>
-          <MeProvider initMe={initMe}>
-            <UploadProvider>
-              <NavBar />
-              <div className="overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
-                {children}
-              </div>
-              <BottomPlayer />
-            </UploadProvider>
-          </MeProvider>
+          <UploadProvider>
+            <NavBar />
+            <div className="overflow-x-hidden overflow-y-auto h-[calc(100vh-160px)]">
+              {children}
+            </div>
+            <BottomPlayer />
+          </UploadProvider>
         </RQProvider>
         <ToastContainer />
       </body>

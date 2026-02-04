@@ -4,11 +4,13 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createCurrentAssetSlice } from '@/shared/currentAsset';
+import { createCurrentUserSlice } from '@/shared/currentUser';
 
 export const useStore = create<BoundState>()(
   devtools(
     immer((...a) => ({
       ...createCurrentAssetSlice(...a),
+      ...createCurrentUserSlice(...a),
     })),
     {
       name: 'band-cloud',
@@ -34,5 +36,5 @@ export const usePersistStore = create<BoundPersistState>()(
   ),
 );
 
-export type BoundState = CurrentAssetState;
+export type BoundState = CurrentAssetState & CurrentUserState;
 export type BoundPersistState = UploadState;

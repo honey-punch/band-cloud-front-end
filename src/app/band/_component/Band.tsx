@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useLayoutEffect, useEffect, useContext } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import { useInfiniteBandSearch } from '@/hooks/band/useBand';
 import BandItem from '@/app/user/[userId]/_component/BandItem';
 import { ClipLoader } from 'react-spinners';
 import { FaPlus } from 'react-icons/fa6';
 import BackDrop from '@/components/BackDrop';
 import CreateBandModal from '@/app/band/_component/CreateBandModal';
-import { MeContext } from '@/app/_component/MeProvider';
 import SearchInput from '@/components/SearchInput';
+import { useStore } from '@/shared/rootStore';
 
 export default function Band() {
-  // context
-  const { me, setIsOpenLoginModal } = useContext(MeContext);
+  // zustand
+  const me = useStore((state) => state.me);
+  const setIsOpenLoginModal = useStore((state) => state.setIsOpenLoginModal);
 
   // states
   const [searchBandParams, setSearchBandParams] = useState<SearchParams>({
