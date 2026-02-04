@@ -9,3 +9,4 @@ type Reply = {
 
 type CreateReplyBody = { content: string; userId: string };
 type UpdateReplyBody = { content: string };
+type ReplyTotalCount = { totalCount: number };

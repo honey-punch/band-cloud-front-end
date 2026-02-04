@@ -138,7 +138,7 @@ export default function BottomPlayer() {
         onDurationChange={(e) => {
           setDuration(e.currentTarget.duration);
         }}
-        src={currentAssetId ? `/file/audio/${currentAssetId}` : '/default.mp3'}
+        src={currentAssetId || `/file/audio/${currentAssetId}`}
         className="hidden"
       ></audio>
 

@@ -2,17 +2,16 @@ import WaveAudioPlayer from '@/app/_component/WaveAudioPlayer';
 import { useState, useRef, FormEvent, ChangeEvent } from 'react';
 import { FaMessage } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
-import { useCreateReply, useReplyByAssetId } from '@/hooks/reply/useReply';
 import { FaImage } from 'react-icons/fa';
 import { useUpdateAsset, useUpdateAssetThumbnail } from '@/hooks/asset/useAsset';
 import { useRouter } from 'next/navigation';
-import Reply from '@/app/_component/Reply';
 import { GiCardboardBox, GiCardboardBoxClosed } from 'react-icons/gi';
-import TextForm from '@/components/TextForm';
 import { useImage } from '@/hooks/useImage';
 import { useStore } from '@/shared/rootStore';
 import { Tooltip } from 'react-tooltip';
 import { ClipLoader } from 'react-spinners';
+import ReplySection from '@/app/_component/ReplySection';
+import { useReplyTotalCount } from '@/hooks/reply/useReply';
 
 interface AssetListItemProps {
   asset: Asset;
@@ -29,14 +28,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
   const currentAssetId = useStore((state) => state.currentAssetId);
 
   // states
-  const [reply, setReply] = useState<string>('');
   const [isOpenReply, setIsOpenReply] = useState<boolean>(false);
-  const [searchReplyParams, setSearchReplyParams] = useState<SearchParams>({
-    page: 0,
-    size: 25,
-    sort: 'createdDate,desc',
-    limit: 9999,
-  });
 
   // hooks
   // asset
@@ -52,12 +44,9 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
     id: asset.id || '',
   });
 
-  const { replyList, hasNextPage, fetchNextPage } = useReplyByAssetId(asset.id, searchReplyParams);
-  const replyResultList = replyList?.pages.flatMap((page) => page.result) ?? [];
-  const totalCount = replyList?.pages[0].page?.totalCount ?? 0;
-  const { createReply } = useCreateReply(asset.id, () => {
-    setReply('');
-  });
+  const { replyTotalCount } = useReplyTotalCount(asset.id);
+  const totalCount = replyTotalCount?.result.totalCount || -1;
+
   const { updateAsset, isLoadingUpdateAsset } = useUpdateAsset(
     asset.id,
     () => {
@@ -99,22 +88,6 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
       return;
     }
     fileInputRef.current?.click();
-  }
-
-  function handleSubmitReply(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    if (!reply) {
-      toast('There is no reply for this asset');
-      return;
-    }
-
-    if (!me) {
-      toast('Sign in first');
-      return;
-    }
-
-    createReply({ content: reply, userId: me.id });
   }
 
   return (
@@ -192,35 +165,7 @@ export default function AssetListItem({ asset, searchParams }: AssetListItemProp
         </div>
       </div>
 
-      {isOpenReply && (
-        <div>
-          <div className="mb-4">
-            <TextForm
-              value={reply}
-              placeholder="Write a reply..."
-              onChange={(e) => setReply(e.target.value)}
-              onSubmit={handleSubmitReply}
-              clear={() => setReply('')}
-            />
-          </div>
-
-          <div className="flex flex-col gap-4">
-            {replyResultList.map((reply) => (
-              <Reply key={`reply-list-key-${reply.id}`} reply={reply} />
-            ))}
-            {hasNextPage && (
-              <div
-                onClick={() => {
-                  fetchNextPage();
-                }}
-                className="w-full bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-700 transition-colors flex justify-center font-bold items-center p-2 rounded-full cursor-pointer"
-              >
-                More
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {isOpenReply && <ReplySection assetId={asset.id} />}
 
       <Tooltip id="my-tooltip" />
     </div>

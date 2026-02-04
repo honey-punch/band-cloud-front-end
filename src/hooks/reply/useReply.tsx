@@ -1,5 +1,11 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createReply, deleteReply, getReplyByAssetId, updateReply } from '@/entries/reply/api';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  createReply,
+  deleteReply,
+  getReplyByAssetId,
+  getReplyTotalCount,
+  updateReply,
+} from '@/entries/reply/api';
 import { parseParamsPage } from '@/utils/util';
 
 export function useReplyByAssetId(assetId: string, searchParams: SearchParams) {
@@ -27,6 +33,18 @@ export function useReplyByAssetId(assetId: string, searchParams: SearchParams) {
     hasNextPage,
     isRefetching,
   };
+}
+
+export function useReplyTotalCount(assetId: string) {
+  const { data } = useQuery({
+    queryKey: ['reply', 'totalCount', assetId],
+    queryFn: () => getReplyTotalCount(assetId),
+    enabled: !!assetId,
+    staleTime: 60 * 1_000,
+    gcTime: 120 * 1_000,
+  });
+
+  return { replyTotalCount: data };
 }
 
 export function useCreateReply(assetId: string, onSuccess?: () => void, onError?: () => void) {

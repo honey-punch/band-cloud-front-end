@@ -17,6 +17,23 @@ export async function getReplyByAssetId(assetId: string, params: URLSearchParams
   return response.json().then((res) => res);
 }
 
+export async function getReplyTotalCount(assetId: string) {
+  const response = await api.get<ApiResponse<ReplyTotalCount>>(`/api/reply/${assetId}/count`, {
+    next: {
+      tags: ['reply', assetId, 'count'],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return response.json().then((res) => res);
+}
+
 export async function createReply(assetId: string, body: CreateReplyBody) {
   const response = await api.post<ApiResponse<Reply>>(`/api/reply/${assetId}`, {
     next: {
