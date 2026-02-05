@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUserById } from '@/hooks/user/useUser';
 import { IoMdPlay, IoMdPause } from 'react-icons/io';
 import { useStore } from '@/shared/rootStore';
@@ -11,7 +11,6 @@ interface WaveAudioPlayerProps {
   assetId: string;
   userId: string;
   src: string;
-  searchParams: SearchParams;
   isMe: boolean;
 }
 
@@ -20,14 +19,12 @@ export default function WaveAudioPlayer({
   assetId,
   userId,
   src,
-  searchParams,
   isMe,
 }: WaveAudioPlayerProps) {
   // zustand
   const currentAssetId = useStore((state) => state.currentAssetId);
   const isPlaying = useStore((state) => state.isPlaying);
   const currentTime = useStore((state) => state.currentTime);
-  const duration = useStore((state) => state.duration);
 
   const togglePlayPause = useStore((state) => state.togglePlayPause);
   const seekTo = useStore((state) => state.seekTo);
@@ -43,8 +40,7 @@ export default function WaveAudioPlayer({
   // states
   const [titleValue, setTitleValue] = useState<string>(title);
 
-  // title 업데이트 디바운스는 그대로 (주인님 코드 유지)
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (titleValue !== title) {
         updateAsset({ title: titleValue });
